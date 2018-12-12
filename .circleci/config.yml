@@ -69,7 +69,9 @@ jobs:
           command: |
              if [ "${CIRCLE_BRANCH}" == "test-new-prod-ops" ]; then
                eval `ssh-agent` && ssh-add ~/.ssh/id_rsa* && bundle exec cap production deploy
-
+             else
+               echo "Not on deployment branch => Not deploying to production"
+             fi
       # Save artifacts
       - store_test_results:
           path: /tmp/test-results
