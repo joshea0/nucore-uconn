@@ -90,7 +90,7 @@ end
 group :development, :deployment do
   gem "capistrano",         require: false
   gem "capistrano-rails",   require: false
-  gem "capistrano-rvm",     require: false
+  gem "capistrano-chruby"   ,  require: false
   gem "capistrano-bundler", require: false
 
   # net-ssh 4.2 requires the gems below to support ed25519 keys
