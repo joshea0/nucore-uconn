@@ -1,6 +1,8 @@
 version: 2
 jobs:
   build:
+    environment:
+      CC_TEST_REPORTER_ID: $CODE_CLIMATE_TEST_REPORTER_ID
     parallelism: 4
     docker:
       - image: circleci/ruby:2.4.1-node-browsers
@@ -59,6 +61,14 @@ jobs:
                 --suppress-log \
                 --format junit > /tmp/test-results/teaspoon.xml
             fi
+
+      # Deploy if specified branch
+      - add_ssh_keys
+      - deploy:
+          name: Deploy to staging if branch is develop
+          command: |
+             if [ "${CIRCLE_BRANCH}" == "test-new-prod-ops" ]; then
+               eval `ssh-agent` && ssh-add ~/.ssh/id_rsa* && bundle exec cap production deploy
 
       # Save artifacts
       - store_test_results:
