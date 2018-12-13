@@ -1,13 +1,4 @@
 GIT
-  remote: https://github.com/joshea0/eye-patch
-  revision: 759a9629c857902c034581a7aceb7e9ed1c3f5f3
-  branch: 0.5.1-fix-eye-patch
-  specs:
-    eye-patch (0.5.1)
-      chronic_duration
-      eye (>= 0.6.2)
-
-GIT
   remote: https://github.com/thoughtbot/shoulda-matchers.git
   revision: f951455f0f66ebc09a80bb20089b1b253c2ac0fb
   specs:
@@ -294,6 +285,9 @@ GEM
       kostya-sigar (~> 2.0.0)
       state_machines
       thor
+    eye-patch (0.5.1)
+      chronic_duration
+      eye (>= 0.6.2)
     factory_bot (4.10.0)
       activesupport (>= 3.0.0)
     factory_bot_rails (4.10.0)
@@ -675,7 +669,7 @@ DEPENDENCIES
   devise-encryptable
   dynamic_form
   exception_notification
-  eye-patch (= 0.5.1)!
+  eye-patch
   factory_bot_rails
   fine_uploader!
   fog-aws
