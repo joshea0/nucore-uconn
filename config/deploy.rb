@@ -16,6 +16,7 @@ set :linked_dirs, fetch(:linked_dirs, []).concat(
 
 set :eye_config, "config/eye.yml.erb"
 set :eye_env, -> { { rails_env: fetch(:rails_env) } }
+set :eye_bin, "/usr/local/bin/chruby-exec ruby-2.4.1 -- bundle exec eye-patch"
 
 set :rollbar_token, ENV["ROLLBAR_ACCESS_TOKEN"]
 set :rollbar_env, Proc.new { fetch :rails_env }
