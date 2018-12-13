@@ -130,8 +130,8 @@ group :test do
 end
 
 group :stage, :production do
-  gem "eye-patch", require: false
-  # gem "eye-patch", '0.5.1', require: false, :git => 'https://github.com/joshea0/eye-patch', :branch => '0.5.1-fix-eye-patch'
+  # gem "eye-patch", require: false
+  gem "eye-patch", '0.5.1', require: false, :git => 'https://github.com/joshea0/eye-patch', :branch => '0.5.1-fix-eye-patch'
   gem "exception_notification"
   gem "lograge"
   gem "logstash-event"
