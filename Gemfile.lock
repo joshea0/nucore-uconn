@@ -1,11 +1,11 @@
 GIT
   remote: https://github.com/joshea0/eye-patch
-  revision: 759a9629c857902c034581a7aceb7e9ed1c3f5f3
-  branch: 0.5.1-fix-eye-patch
+  revision: bff05d7af794d74bdaacfc4a977562eb6b4a9813
+  branch: fix-chruby
   specs:
-    eye-patch (0.5.1)
+    eye-patch (1.0.1)
       chronic_duration
-      eye (>= 0.6.2)
+      eye (>= 0.10.0)
 
 GIT
   remote: https://github.com/thoughtbot/shoulda-matchers.git
@@ -675,7 +675,7 @@ DEPENDENCIES
   devise-encryptable
   dynamic_form
   exception_notification
-  eye-patch (= 0.5.1)!
+  eye-patch!
   factory_bot_rails
   fine_uploader!
   fog-aws
@@ -745,7 +745,7 @@ DEPENDENCIES
   will_paginate
 
 RUBY VERSION
-   ruby 2.4.1p111
+   ruby 2.4.5p335
 
 BUNDLED WITH
    1.17.2
