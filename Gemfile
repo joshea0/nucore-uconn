@@ -90,7 +90,7 @@ end
 group :development, :deployment do
   gem "capistrano",         require: false
   gem "capistrano-rails",   require: false
-  gem "capistrano-chruby"   ,  require: false
+  gem "capistrano-chruby",  require: false
   gem "capistrano-bundler", require: false
 
   # net-ssh 4.2 requires the gems below to support ed25519 keys
@@ -130,7 +130,8 @@ group :test do
 end
 
 group :stage, :production do
-  gem "eye-patch", require: false
+  # gem "eye-patch", require: false
+  gem "eye-patch", '0.5.1', require: false, :git => 'https://github.com/joshea0/eye-patch', :branch => '0.5.1-fix-eye-patch'
   gem "exception_notification"
   gem "lograge"
   gem "logstash-event"
