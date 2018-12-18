@@ -1,6 +1,8 @@
 version: 2
 jobs:
   build:
+    environment:
+      CC_TEST_REPORTER_ID: $CODE_CLIMATE_TEST_REPORTER_ID
     parallelism: 4
     docker:
       - image: circleci/ruby:2.4.1-node-browsers
