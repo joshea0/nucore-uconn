@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module BulkEmail
 
   class JobDecorator < SimpleDelegator
@@ -17,6 +19,11 @@ module BulkEmail
     def products
       @products ||=
         Product.where(id: selected_product_ids).pluck(:name).join(", ")
+    end
+
+    def facilities
+      @facilities ||=
+        Facility.where(id: search_criteria["facilities"]).join(", ")
     end
 
     def start_date

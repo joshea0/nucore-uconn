@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe ChartStringReassignmentForm do
@@ -10,9 +12,9 @@ RSpec.describe ChartStringReassignmentForm do
   let(:product) { create(:setup_item) }
   let(:users) { create_list(:user, 9) }
 
-  describe '#available_accounts' do
+  describe "#available_accounts" do
     def grant_account_to_user(account, user)
-      AccountUser.grant(user, AccountUser::ACCOUNT_PURCHASER, account, account_owner)
+      AccountUser.grant(user, AccountUser::ACCOUNT_PURCHASER, account, by: account_owner)
     end
 
     def grant_accounts_to_user(accounts, user)

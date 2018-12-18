@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
   resources :facilities, only: [], path: I18n.t("facilities_downcase") do
     resources :secure_rooms, except: [:show] do
@@ -31,7 +33,7 @@ Rails.application.routes.draw do
   end
 
   namespace :secure_rooms_api do
-    post '/scan', to: 'scans#scan'
+    post "/scan", to: "scans#scan"
     resources :events, only: :create
   end
 end

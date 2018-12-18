@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OrderDetailPresenter < SimpleDelegator
 
   include ActionView::Helpers::NumberHelper
@@ -48,10 +50,6 @@ class OrderDetailPresenter < SimpleDelegator
   end
 
   private
-
-  def format_as_currency(value)
-    value.present? ? number_to_currency(value) : ""
-  end
 
   # Is a fulfilled order detail nearing the end of the 90 day reconcile period?
   # Returns true if it is 60+ days fulfilled, false otherwise

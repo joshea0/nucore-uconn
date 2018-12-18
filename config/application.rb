@@ -1,6 +1,8 @@
-require_relative 'boot'
+# frozen_string_literal: true
 
-require 'rails/all'
+require_relative "boot"
+
+require "rails/all"
 require "will_paginate/array"
 
 # Require the gems listed in Gemfile, including any gems
@@ -37,6 +39,7 @@ module Nucore
     config.time_zone = "Central Time (US & Canada)" # move to settings
 
     config.active_record.observers = :order_detail_observer
+
   end
 
 end

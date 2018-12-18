@@ -1,5 +1,5 @@
-class InstrumentPricePoliciesController < PricePoliciesController
+# frozen_string_literal: true
 
-  helper RateDisplayHelper
+class InstrumentPricePoliciesController < PricePoliciesController
 
 end

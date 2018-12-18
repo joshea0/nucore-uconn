@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :facility_account do
     facility
@@ -8,8 +10,8 @@ FactoryBot.define do
       "134-7#{'%06d' % n}"
     end
 
-    is_active true
-    created_by 1
+    is_active { true }
+    created_by { 1 }
 
     after(:build) do |facility_account|
       define_open_account(facility_account.revenue_account, facility_account.account_number)

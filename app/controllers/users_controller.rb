@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class UsersController < ApplicationController
 
   module Overridable
@@ -19,7 +21,7 @@ class UsersController < ApplicationController
   before_action :check_acting_as
 
   load_and_authorize_resource except: [:create, :password, :password_reset, :edit, :update, :show], id_param: :user_id
-  load_and_authorize_resource only: [:edit, :update, :show, :suspend, :unsuspend], id_param: :id
+  load_and_authorize_resource only: [:edit, :update, :show, :suspend, :unsuspend, :unexpire], id_param: :id
 
   layout "two_column"
 
@@ -97,6 +99,9 @@ class UsersController < ApplicationController
 
   # GET /facilities/:facility_id/users/:user_id/access_list
   def access_list
+    # Unsupported in cross-facility mode
+    raise ActiveRecord::RecordNotFound if current_facility.cross_facility?
+
     @facility = current_facility
     @products_by_type = Product.for_facility(@facility).requiring_approval_by_type
     @training_requested_product_ids = @user.training_requests.pluck(:product_id)
@@ -104,6 +109,9 @@ class UsersController < ApplicationController
 
   # POST /facilities/:facility_id/users/:user_id/access_list/approvals
   def access_list_approvals
+    # Unsupported in cross-facility mode
+    raise ActiveRecord::RecordNotFound if current_facility.cross_facility?
+
     update_access_list_approvals
     redirect_to facility_user_access_list_path(current_facility, @user)
   end
@@ -129,13 +137,18 @@ class UsersController < ApplicationController
   def suspend
     @user.suspended_at ||= Time.current
     @user.save!
-    redirect_to facility_user_path(current_facility, @user), notice: "User suspended"
+    redirect_to facility_user_path(current_facility, @user), notice: text("suspend.success")
   end
 
   # PATCH /facilities/:facility_id/users/:id/unsuspend
   def unsuspend
     @user.update!(suspended_at: nil)
-    redirect_to facility_user_path(current_facility, @user), notice: "User re-activated"
+    redirect_to facility_user_path(current_facility, @user), notice: text("unsuspend.success")
+  end
+
+  def unexpire
+    @user.update!(expired_at: nil, expired_note: nil)
+    redirect_to facility_user_path(current_facility, @user), notice: text("unexpire.success")
   end
 
   private

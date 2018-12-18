@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "devise_ldap_authenticatable"
 require "ldap_authentication/user_entry"
 require "ldap_authentication/user_converter"
@@ -35,7 +37,10 @@ module LdapAuthentication
   end
 
   def self.load_config_from_file
-    yaml = YAML.safe_load(ERB.new(File.read(Rails.root.join("config", "ldap.yml"))).result) || {}
+    config_file_path = Rails.root.join("config", "ldap.yml")
+    parsed = ERB.new(File.read(config_file_path)).result
+    # safe_load(yaml, whitelist_classes, whitelist_symbols, allow_aliases)
+    yaml = YAML.safe_load(parsed, [], [], true) || {}
     yaml.fetch(Rails.env, {})
   end
 

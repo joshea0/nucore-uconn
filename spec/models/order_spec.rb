@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 def define_purchasable_instrument
@@ -78,7 +80,7 @@ RSpec.describe Order do
     context "estimated" do
       let!(:order_detail_1) { create(:order_detail, order: order, product: item, account: account, estimated_cost: 10, estimated_subsidy: 5, price_policy: price_policy) }
       let!(:order_detail_2) { create(:order_detail, order: order, product: item, account: account, estimated_cost: 12, estimated_subsidy: 0, price_policy: price_policy) }
-      let!(:canceled_order_detail) { create(:order_detail, order: order, product: item, account: account, estimated_cost: 8, estimated_subsidy: 2, price_policy: price_policy, state: 'canceled') }
+      let!(:canceled_order_detail) { create(:order_detail, order: order, product: item, account: account, estimated_cost: 8, estimated_subsidy: 2, price_policy: price_policy, state: "canceled") }
 
       it "should have the expected estimated_cost" do
         expect(order.estimated_cost).to eq 22

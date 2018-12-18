@@ -1,8 +1,11 @@
+# frozen_string_literal: true
+
 class Instrument < Product
 
   include Products::RelaySupport
   include Products::ScheduleRuleSupport
   include Products::SchedulingSupport
+  include EmailListAttribute
 
   RESERVE_INTERVALS = [1, 5, 10, 15, 30, 60].freeze
 
@@ -12,6 +15,9 @@ class Instrument < Product
   has_many :instrument_price_policies, foreign_key: "product_id"
   has_many :admin_reservations, foreign_key: "product_id"
   has_many :offline_reservations, foreign_key: "product_id"
+  has_one :alert, dependent: :destroy, class_name: "InstrumentAlert"
+
+  email_list_attribute :cancellation_email_recipients
 
   # Validations
   # --------
@@ -44,10 +50,6 @@ class Instrument < Product
   # Instance methods
   # -------
 
-  def time_data_for(order_detail)
-    order_detail.reservation
-  end
-
   def time_data_field
     :reservation
   end
@@ -65,10 +67,6 @@ class Instrument < Product
     true
   end
 
-  def restriction_levels_for(user)
-    product_access_groups.joins(:product_users).where(product_users: { user_id: user.id })
-  end
-
   def set_default_pricing
     PriceGroup.globals.find_each do |pg|
       PriceGroupProduct.create!(product: self, price_group: pg, reservation_window: PriceGroupProduct::DEFAULT_RESERVATION_WINDOW)
@@ -81,6 +79,10 @@ class Instrument < Product
 
   def quantity_as_time?
     true
+  end
+
+  def has_alert?
+    alert.present?
   end
 
   private

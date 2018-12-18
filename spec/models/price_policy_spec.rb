@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe PricePolicy do
@@ -115,7 +117,7 @@ RSpec.describe PricePolicy do
       expect(@pp.can_purchase).to be false
     end
 
-    it 'should alias #restrict with query method' do
+    it "should alias #restrict with query method" do
       expect(@pp).to be_respond_to :restrict_purchase?
       expect(@pp.restrict_purchase).to eq(@pp.restrict_purchase?)
     end
@@ -182,12 +184,12 @@ RSpec.describe PricePolicy do
         @sp = PricePolicy.new
       end
 
-      it 'should abstract #calculate_cost_and_subsidy' do
+      it "should abstract #calculate_cost_and_subsidy" do
         expect(@sp).to be_respond_to(:calculate_cost_and_subsidy)
         expect { @sp.calculate_cost_and_subsidy }.to raise_error RuntimeError
       end
 
-      it 'should abstract #estimate_cost_and_subsidy' do
+      it "should abstract #estimate_cost_and_subsidy" do
         expect(@sp).to be_respond_to(:estimate_cost_and_subsidy)
         expect { @sp.estimate_cost_and_subsidy }.to raise_error RuntimeError
       end
@@ -220,6 +222,50 @@ RSpec.describe PricePolicy do
 
     end
 
+  end
+
+  describe "note" do
+    context "when the required note feature is enabled", feature_setting: { price_policy_requires_note: true } do
+      it "requires the note" do
+        note = described_class.new(note: "")
+        expect(note).to be_invalid
+        expect(note.errors).to be_added(:note, :blank)
+        expect(note.errors).not_to be_added(:note, :too_short, count: 10)
+      end
+
+      it "requires the note be long enough" do
+        note = described_class.new(note: "a")
+        expect(note).to be_invalid
+        expect(note.errors).not_to be_added(:note, :blank)
+        expect(note.errors).to be_added(:note, :too_short, count: 10)
+      end
+
+      it "is fine when it is present and long enough" do
+        note = described_class.new(note: "12345678910")
+        note.valid?
+        expect(note.errors).not_to include(:note)
+      end
+
+      it "requires it be short enough" do
+        note = described_class.new(note: "x" * 257)
+        expect(note).to be_invalid
+        expect(note.errors).to be_added(:note, :too_long, count: 256)
+      end
+    end
+
+    context "when the required note feature is disabled", feature_setting: { price_policy_requires_note: false } do
+      it "is fine with a blank value" do
+        note = described_class.new(note: "")
+        note.valid?
+        expect(note.errors).not_to include(:note)
+      end
+
+      it "requires it be short enough" do
+        note = described_class.new(note: "x" * 257)
+        expect(note).to be_invalid
+        expect(note.errors).to be_added(:note, :too_long, count: 256)
+      end
+    end
   end
 
 end

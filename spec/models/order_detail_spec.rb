@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe OrderDetail do
@@ -146,7 +148,7 @@ RSpec.describe OrderDetail do
   context "account reassignment" do
     let(:unassociated_account) { build_stubbed(:setup_account) }
 
-    describe '#can_be_assigned_to_account?' do
+    describe "#can_be_assigned_to_account?" do
       it "may be reassigned to its current account" do
         expect(@order_detail.can_be_assigned_to_account?(@order_detail.account))
           .to be true
@@ -1253,7 +1255,7 @@ RSpec.describe OrderDetail do
     end
   end
 
-  context '#cancel_reservation' do
+  context "#cancel_reservation" do
     let(:statement) { create(:statement, facility: facility, created_by: user.id, account: account) }
 
     before :each do
@@ -1277,7 +1279,7 @@ RSpec.describe OrderDetail do
         expect(order_detail.statement).to be_blank
       end
 
-      it 'should have no #statement_date' do
+      it "should have no #statement_date" do
         expect(order_detail.statement_date).to be_blank
       end
     end
@@ -1296,11 +1298,11 @@ RSpec.describe OrderDetail do
       end
 
       it "has no actual cost" do
-        expect(order_detail.actual_cost).to be_blank
+        expect(order_detail.actual_cost.to_f).to be_zero
       end
 
       it "has no actual subsidy" do
-        expect(order_detail.actual_subsidy).to be_blank
+        expect(order_detail.actual_subsidy.to_f).to be_zero
       end
     end
 
@@ -1402,7 +1404,7 @@ RSpec.describe OrderDetail do
     end
   end
 
-  context '#cancellation_fee' do
+  context "#cancellation_fee" do
     shared_examples_for "it charges a cancellation fee" do
       it "has a cancellation fee" do
         expect(order_detail.cancellation_fee).to be > 0
@@ -1565,7 +1567,7 @@ RSpec.describe OrderDetail do
     end
   end
 
-  context '#update_order_status!' do
+  context "#update_order_status!" do
     context "when setting order status to Canceled" do
 
       def cancel_order_detail(options)
@@ -1607,6 +1609,19 @@ RSpec.describe OrderDetail do
                 expect { cancel_order_detail(admin: true, apply_cancel_fee: true) }
                   .not_to change { order_detail.statement }
               end
+            end
+          end
+
+          context "has full cost cancellation fee", feature_setting: { charge_full_price_on_cancellation: true } do
+            before do
+              PricePolicy.update_all(full_price_cancellation: true, usage_rate: 3, usage_subsidy: 1)
+              order_detail.price_policy.reload
+            end
+
+            it "has the correct costs" do
+              expect { cancel_order_detail(admin: true, apply_cancel_fee: true) }
+                .to change { order_detail.reload.actual_cost }.to(180)
+                                                              .and change { order_detail.actual_subsidy }.to(60)
             end
           end
 
@@ -1823,7 +1838,7 @@ RSpec.describe OrderDetail do
     end
   end
 
-  describe '#complete!' do
+  describe "#complete!" do
     before { order_detail.complete! }
 
     it "saved" do
@@ -1836,13 +1851,6 @@ RSpec.describe OrderDetail do
 
     it "fulfills the order" do
       expect(order_detail.fulfilled_at).to be_present
-    end
-  end
-
-  describe "#force_complete!" do
-    it "forces a transition from new to complete" do
-      expect { order_detail.force_complete! }
-        .to change { order_detail.reload.state }.from("new").to("complete")
     end
   end
 
@@ -1876,6 +1884,21 @@ RSpec.describe OrderDetail do
     it "does not include order details canceled with a cost" do
       order_detail.update!(state: "complete", canceled_at: 5.minutes.ago)
       expect(OrderDetail.with_upcoming_reservation).not_to include(order_detail)
+    end
+  end
+
+  describe ".where_ids_in" do
+    it "finds the items" do
+      od2 = order_detail.dup.tap(&:save)
+      od3 = order_detail.dup.tap(&:save)
+      od4 = order_detail.dup.tap(&:save) # not looked up
+
+      expect(described_class.where_ids_in([order_detail.id, od2.id, od3.id], batch_size: 2))
+        .to contain_exactly(order_detail, od2, od3)
+    end
+
+    it "doesn't blow up on 1000+ entries" do
+      described_class.where_ids_in((0..1001).to_a).to_a
     end
   end
 end

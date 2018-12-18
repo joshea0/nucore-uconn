@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe "Managing User Details", :aggregate_failures, feature_setting: { create_users: true, user_based_price_groups: true } do
@@ -7,7 +9,7 @@ RSpec.describe "Managing User Details", :aggregate_failures, feature_setting: { 
   describe "edit" do
     describe "as a facility admin" do
       let(:admin) { FactoryBot.create(:user, :administrator) }
-      let(:user) { FactoryBot.create(:user, username: 'user123') }
+      let(:user) { FactoryBot.create(:user, username: "user123") }
 
       before do
         login_as admin
@@ -23,7 +25,7 @@ RSpec.describe "Managing User Details", :aggregate_failures, feature_setting: { 
 
         click_button "Update"
 
-        expect(page).to have_content("Internal PricingNo")
+        expect(page).to have_content("Internal Pricing\nNo")
 
         click_link "Edit"
 
@@ -31,7 +33,7 @@ RSpec.describe "Managing User Details", :aggregate_failures, feature_setting: { 
 
         click_button "Update"
 
-        expect(page).to have_content("Internal PricingYes")
+        expect(page).to have_content("Internal Pricing\nYes")
       end
 
     end

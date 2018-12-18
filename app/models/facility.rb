@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Facility < ApplicationRecord
 
   before_validation :set_journal_mask, on: :create
@@ -59,10 +61,6 @@ class Facility < ApplicationRecord
   def destroy
     # TODO: can you ever delete a facility? Currently no.
     # super
-  end
-
-  def description
-    self[:description]&.html_safe
   end
 
   def order_statuses

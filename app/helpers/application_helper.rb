@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Methods added to this helper will be available to all templates in the application.
 module ApplicationHelper
 
@@ -35,6 +37,14 @@ module ApplicationHelper
   def facility_product_path(facility, product)
     method = "facility_#{product.class.model_name.to_s.underscore}_path"
     send(method, facility, product)
+  end
+
+  def warning_if_instrument_is_offline_or_partially_available(instrument)
+    if instrument.offline?
+      tooltip_icon "fa fa-exclamation-triangle icon-large", t("instruments.offline.note")
+    elsif instrument.has_alert?
+      tooltip_icon "fa fa-exclamation-triangle partially-available-warning icon-large", instrument.alert.note
+    end
   end
 
   private

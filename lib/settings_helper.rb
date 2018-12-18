@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SettingsHelper
 
   def self.fiscal_year_end(date = nil)
@@ -33,7 +35,7 @@ module SettingsHelper
   #   If you want to check setting 'feature.password_update_on'
   #   then this parameter would be :password_update
   def self.feature_on?(feature)
-    Settings.feature.try(:"#{feature}_on")
+    !!Settings.feature["#{feature}_on"]
   end
 
   def self.feature_off?(feature)

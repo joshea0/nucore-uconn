@@ -1,0 +1,7 @@
+en:
+  activerecord:
+    errors:
+      models:
+        account:
+          not_open: "The %{model} is not open for the required account"
+          missing_owner: Must have an account owner

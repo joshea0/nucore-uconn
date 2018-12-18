@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe EndReservationOnly, :time_travel do
@@ -6,7 +8,7 @@ RSpec.describe EndReservationOnly, :time_travel do
   let(:action) { described_class.new }
   let(:order_detail) { reservation.order_detail }
 
-  describe '#perform' do
+  describe "#perform" do
     context "an unpurchased reservation" do
       let!(:reservation) { create(:setup_reservation, :yesterday) }
 

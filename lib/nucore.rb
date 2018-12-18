@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module NUCore
 
-  class PermissionDenied < SecurityError
+  class PermissionDenied < RuntimeError
   end
 
   class Error < StandardError
@@ -13,10 +15,6 @@ module NUCore
   end
 
   class PurchaseException < NUCore::Error; end
-
-  def self.portal
-    "nucore"
-  end
 
   module Database
 
@@ -58,14 +56,14 @@ module NUCore
         # Oracle has a limit of 1000 items in a WHERE IN clause. Use this in
         # place of `where(id: ids)` when there might be more than 1000 ids.
         # Example: facility.order_details.complete.where_ids_in(ids)
-        def where_ids_in(ids)
+        def where_ids_in(ids, batch_size: 999)
           if NUCore::Database.oracle?
             return none if ids.blank?
 
-            queries = ids.each_slice(999).flat_map do |id_slice|
-              unscoped.where(id: id_slice).where_values
+            clauses = ids.each_slice(batch_size).map do |id_slice|
+              "#{table_name.upcase}.ID IN (#{id_slice.join(', ')})"
             end
-            where(queries.reduce(:or))
+            where(clauses.join(" OR "))
           else
             where(id: ids)
           end

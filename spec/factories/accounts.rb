@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :account do
-    type "Account"
+    type { "Account" }
     sequence(:account_number) { |n| n }
-    description "Account description"
+    description { "Account description" }
     expires_at { 50.years.from_now }
-    created_by 0
+    created_by { 0 }
   end
 
   trait :with_account_owner do

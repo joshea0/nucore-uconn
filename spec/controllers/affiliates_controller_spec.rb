@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 require "controller_spec_helper"
 
@@ -120,13 +122,5 @@ RSpec.describe AffiliatesController do
     yield if block_given?
     expect(assigns(:affiliate).name).to be_blank
     is_expected.to render_template template
-  end
-
-  def no_attrs_test
-    @params[:affiliate] = nil
-    maybe_grant_always_sign_in :admin
-    do_request
-    expect(flash[:error]).to be_present
-    yield if block_given?
   end
 end

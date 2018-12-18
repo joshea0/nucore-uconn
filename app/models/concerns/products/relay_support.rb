@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Products::RelaySupport
 
   extend ActiveSupport::Concern
@@ -22,10 +24,6 @@ module Products::RelaySupport
 
   def current_instrument_status
     instrument_statuses.order("created_at DESC").first
-  end
-
-  def has_relay?
-    relay && (relay.is_a?(RelayDummy) || relay.ip && relay.port)
   end
 
   def has_real_relay?

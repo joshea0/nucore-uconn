@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SecureRooms
 
   class ScanResponsePresenter
@@ -7,7 +9,7 @@ module SecureRooms
         status: status_for_code(verdict.result_code),
         json: {
           tablet_identifier: verdict.card_reader.tablet_token,
-          name: verdict.user.full_name,
+          name: verdict.user&.full_name,
           response: verdict.result_code,
           reason: verdict.reason,
           accounts: SecureRooms::AccountPresenter.wrap(verdict.accounts),
