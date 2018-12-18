@@ -1,5 +1,8 @@
 = content_for :h1 do
   = current_facility
+- if SettingsHelper.feature_on?(:facility_banner_notice) && strip_tags(current_facility.banner_notice).present?
+  = content_for :banner do
+    .global-alert-banner= sanitize current_facility.banner_notice
 
 - if acting_as? || session_user.try(:operator_of?, current_facility)
   - instruments = current_facility.instruments.active_plus_hidden
@@ -20,19 +23,20 @@
     %li== &raquo;
     %li= current_facility
 
-.wysiwyg= current_facility.description
+.wysiwyg= sanitize current_facility.description
 
-.product_list_container{class: @columns}
-  - if @order_form
-    = form_for @order_form, url: add_order_path(acting_user.cart(session_user)), html: {method: :put } do |f|
-      = render partial: 'product_list', locals: {products: instruments, f: f, title_extra: daily_view_link }
-      = render partial: 'product_list', locals: {products: services, f: f}
-      = render partial: 'product_list', locals: {products: timed_services, f: f}
-      = render partial: 'product_list', locals: {products: items, f: f}
-      = render partial: 'product_list', locals: {products: bundles, f: f}
 
+- if @order_form
+  = form_for @order_form, url: add_order_path(acting_user.cart(session_user)), html: {method: :put, class:['product_list_container', @columns]} do |f|
+    = render partial: 'product_list', locals: {products: instruments, f: f, title_extra: daily_view_link }
+    = render partial: 'product_list', locals: {products: services, f: f}
+    = render partial: 'product_list', locals: {products: timed_services, f: f}
+    = render partial: 'product_list', locals: {products: items, f: f}
+    = render partial: 'product_list', locals: {products: bundles, f: f}
+    .button_row
       = f.submit class: ['btn', 'btn-primary']
-  - else
+- else
+  .product_list_container{class: @columns}
     = render partial: 'product_list', locals: {products: instruments, title_extra: daily_view_link }
     = render partial: 'product_list', locals: {products: services}
     = render partial: 'product_list', locals: {products: timed_services}

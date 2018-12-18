@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 class Product < ApplicationRecord
 
   include TextHelpers::Translation
+  include EmailListAttribute
 
   belongs_to :facility
   belongs_to :initial_order_status, class_name: "OrderStatus"
@@ -14,6 +17,8 @@ class Product < ApplicationRecord
   has_many :accessories, through: :product_accessories, class_name: "Product"
   has_many :price_policies
   has_many :training_requests, dependent: :destroy
+
+  email_list_attribute :training_request_contacts
 
   # Allow us to use `product.hidden?`
   alias_attribute :hidden, :is_hidden
@@ -49,14 +54,6 @@ class Product < ApplicationRecord
     errors.add(:contact_email, text("errors.models.product.attributes.contact_email.required")) unless email.present?
   end
 
-  validate do |record|
-    # Simple validation that all emails contain an @ followed by a word character,
-    # and is not at the start of the string.
-    unless training_request_contacts.all? { |email| email =~ /.@\w/ }
-      record.errors.add(:training_request_contacts)
-    end
-  end
-
   scope :active, -> { where(is_archived: false, is_hidden: false) }
   scope :active_plus_hidden, -> { where(is_archived: false) } # TODO: phase out in favor of the .not_archived scope
   scope :alphabetized, -> { order("lower(products.name)") }
@@ -65,6 +62,7 @@ class Product < ApplicationRecord
   scope :mergeable_into_order, -> { not_archived.where(type: mergeable_types) }
   scope :in_active_facility, -> { joins(:facility).where(facilities: { is_active: true }) }
   scope :of_type, ->(type) { where(type: type) }
+  scope :with_schedule, -> { where.not(schedule_id: nil) }
 
   def self.types
     @types ||= [Instrument, Item, Service, TimedService, Bundle]
@@ -289,14 +287,6 @@ class Product < ApplicationRecord
     !offline?
   end
 
-  def training_request_contacts
-    CsvArrayString.new(self[:training_request_contacts])
-  end
-
-  def training_request_contacts=(str)
-    self[:training_request_contacts] = CsvArrayString.new(str).to_s
-  end
-
   def user_notes_field_mode
     Products::UserNoteMode[self[:user_notes_field_mode]]
   end
@@ -308,6 +298,10 @@ class Product < ApplicationRecord
   def is_accessible_to_user?(user)
     is_operator = user&.operator_of?(facility)
     !(is_archived? || (is_hidden? && !is_operator))
+  end
+
+  def has_alert?
+    false
   end
 
   protected

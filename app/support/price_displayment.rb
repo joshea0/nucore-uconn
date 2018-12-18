@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Module for use by OrderDetail for easier interface to costs and subsidies
 #
@@ -92,10 +94,6 @@ module PriceDisplayment
     else
       QuantityDisplay.new(quantity)
     end
-  end
-
-  def display_quantity
-    build_quantity_presenter.value
   end
 
   def wrapped_quantity

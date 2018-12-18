@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe Account do
@@ -110,7 +112,7 @@ RSpec.describe Account do
     end
   end
 
-  context '#unreconciled_total' do
+  context "#unreconciled_total" do
     context "without unreconciled order_details" do
       it "should total 0" do
         expect(account.unreconciled_total(facility)).to eq 0
@@ -205,6 +207,15 @@ RSpec.describe Account do
     it "should require an account owner" do
       @account = Account.create
       expect(@account.errors[:base]).to eq(["Must have an account owner"])
+    end
+
+    it "autosaves the association to the account owner" do
+      user = FactoryBot.create(:user)
+      account = FactoryBot.build(:account)
+      account_user = account.account_users.build(user: user, user_role: AccountUser::ACCOUNT_OWNER, created_by_user: user)
+
+      expect(account.save).to be_truthy
+      expect(account_user).to be_persisted
     end
 
     it "should find the non-deleted account owner" do

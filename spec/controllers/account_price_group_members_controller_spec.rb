@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 require "controller_spec_helper"
 
@@ -133,19 +135,21 @@ RSpec.describe AccountPriceGroupMembersController do
   end
 
   context "search_results" do
-    let!(:account) { FactoryBot.create(:account, :with_account_owner, account_number: "TESTING123") }
+    # Ignore validation errors, e.g. number format
+    before { allow(ValidatorFactory).to receive(:instance).and_return(ValidatorDefault.new) }
+
+    let!(:account) { FactoryBot.create(:nufs_account, :with_account_owner, account_number: "TESTING123") }
 
     before :each do
       @method = :get
       @action = :search_results
-      @params = { facility_id: @authable.url_name, price_group_id: price_group.id, search_term: "TESTING123" }
+      @params = { facility_id: facility.url_name, price_group_id: price_group.id, search_term: "TESTING123" }
     end
 
     it_should_require_login
 
     it_should_deny :guest
 
-    # it_should_allow_all facility_operators do
     it_should_allow :admin do
       expect(assigns(:accounts)).to include(account)
       expect(assigns(:limit)).to be_kind_of Integer

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe AutoLogout, :time_travel do
@@ -45,6 +47,10 @@ RSpec.describe AutoLogout, :time_travel do
     it "deactivates the relay" do
       # see before block for deactivate expectation
       action.perform
+    end
+
+    it "triggers an email" do
+      expect { action.perform }.to change(ActionMailer::Base.deliveries, :count).by(1)
     end
   end
 

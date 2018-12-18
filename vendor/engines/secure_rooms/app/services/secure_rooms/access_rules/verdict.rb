@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SecureRooms
 
   module AccessRules
@@ -13,6 +15,7 @@ module SecureRooms
         :result_code,
         :selected_account,
         :accounts,
+        :card_number,
       )
 
       def initialize(result_code, reason, user, card_reader, options = {})
@@ -22,6 +25,7 @@ module SecureRooms
         @reason = translate_reason(reason)
         @selected_account = options[:selected_account]
         @accounts = options[:accounts]
+        @card_number = options[:card_number]
       end
 
       def pass?

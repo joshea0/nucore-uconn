@@ -14,6 +14,7 @@ en:
       no_accounts: "User has no valid accounts for this Product"
       selection_needed: "Must select Account"
       rules_failed: "No rule generated a verdict"
+      user_not_found: "User is not found"
 
   pages:
     admin_occupancies: Occupancies
@@ -26,6 +27,10 @@ en:
       missing_exit:
         badge: Missing Exit
         alert: This order's occupancy does not have an exit time. Please ensure that all times are set and there is a price policy for the date this order was fulfilled.
+
+  search:
+    extra_headers:
+      card_number: Card Number
 
   secure_rooms:
     facility_occupancies:
@@ -137,6 +142,7 @@ en:
         secure_rooms_dashboard:
           time_label: Occupancy Data Taken At
           current: Current Occupants
+          current_continued: Current Occupants (Continued)
           recent: Recent Occupants
 
   simple_form:

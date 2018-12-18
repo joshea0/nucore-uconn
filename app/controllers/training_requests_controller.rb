@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 class TrainingRequestsController < ApplicationController
 
   include SortableColumnController
 
+  customer_tab :new, :create
   admin_tab :index
 
   before_action :authenticate_user!

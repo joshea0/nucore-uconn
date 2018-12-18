@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe NUCore::Database::DateHelper do
@@ -7,7 +9,7 @@ RSpec.describe NUCore::Database::DateHelper do
 
   end
 
-  describe '#parse_2_digit_year_date' do
+  describe "#parse_2_digit_year_date" do
     def parse_date(date_string)
       DateHelperClass.parse_2_digit_year_date(date_string).strftime("%Y-%m-%d")
     end

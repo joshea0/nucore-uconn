@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProductsCommonController < ApplicationController
 
   customer_tab  :show
@@ -101,8 +103,7 @@ class ProductsCommonController < ApplicationController
   def resource_params
     params.require(:"#{singular_object_name}").permit(:name, :url_name, :contact_email, :description,
                                                       :facility_account_id, :account, :initial_order_status_id,
-                                                      :requires_approval, :training_request_contacts,
-                                                      :is_archived, :is_hidden, :order_notification_recipient,
+                                                      :requires_approval, :is_archived, :is_hidden,
                                                       :user_notes_field_mode, :user_notes_label, :show_details,
                                                       :schedule_id, :control_mechanism, :reserve_interval,
                                                       :min_reserve_mins, :max_reserve_mins, :min_cancel_hours,
@@ -113,11 +114,6 @@ class ProductsCommonController < ApplicationController
 
   def current_facility_products
     product_class.where(facility: current_facility).alphabetized
-  end
-
-  def price_policy_available_for_product?
-    groups = (acting_user.price_groups + acting_user.account_price_groups).flatten.uniq.collect(&:id)
-    @product.can_purchase?(groups)
   end
 
   # Dynamically get the proper object from the database based on the controller name
@@ -140,9 +136,5 @@ class ProductsCommonController < ApplicationController
     product_class.to_s.underscore
   end
   helper_method :singular_object_name
-
-  def session_user_can_override_restrictions?(product)
-    session_user.present? && session_user.can_override_restrictions?(product)
-  end
 
 end

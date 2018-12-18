@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe Reservation do
@@ -1056,7 +1058,7 @@ RSpec.describe Reservation do
     expect(reservation).to be_can_start_early
   end
 
-  describe '#start_reservation!' do
+  describe "#start_reservation!" do
     it "sets actual start time", :time_travel do
       reservation.start_reservation!
       expect(reservation.actual_start_at).to eq(Time.current)
@@ -1071,7 +1073,7 @@ RSpec.describe Reservation do
                           actual_start_at: start_time)
       end
 
-      before do
+      def perform
         order = running.order_detail.order
         order.state = "validated"
         order.purchase!
@@ -1080,15 +1082,20 @@ RSpec.describe Reservation do
       end
 
       it "completes the running reservation" do
-        expect(running.reload).to be_complete
+        expect { perform }.to change { running.reload.complete? }.to be(true)
       end
 
       it "sets the orders as a problem order" do
-        expect(running.reload.order_detail).to be_problem
+        expect { perform }.to change { running.order_detail.reload.problem? }.to be(true)
       end
 
       it "does not set actual_end_at" do
+        perform
         expect(running.reload.actual_end_at).to be_nil
+      end
+
+      it "triggers an email" do
+        expect { perform }.to change(ActionMailer::Base.deliveries, :count).by(1)
       end
     end
 
@@ -1096,7 +1103,7 @@ RSpec.describe Reservation do
       let(:running_instrument) { create(:setup_instrument, schedule: reservation.product.schedule, min_reserve_mins: 1) }
       let!(:running) { create :setup_reservation, product: running_instrument, reserve_start_at: 30.minutes.ago, reserve_end_at: 1.minute.ago, actual_start_at: 30.minutes.ago }
 
-      before do
+      def perform
         order = running.order_detail.order
         order.state = "validated"
         order.purchase!
@@ -1108,15 +1115,20 @@ RSpec.describe Reservation do
       end
 
       it "completes the running reservation" do
-        expect(running.reload).to be_complete
+        expect { perform }.to change { running.reload.complete? }.to be(true)
       end
 
       it "sets the orders as a problem order" do
-        expect(running.reload.order_detail).to be_problem
+        expect { perform }.to change { running.order_detail.reload.problem? }.to be(true)
       end
 
       it "does not set actual_end_at" do
+        perform
         expect(running.reload.actual_end_at).to be_nil
+      end
+
+      it "triggers an email" do
+        expect { perform }.to change(ActionMailer::Base.deliveries, :count).by(1)
       end
     end
 
@@ -1132,6 +1144,49 @@ RSpec.describe Reservation do
       it "does nothing" do
         expect { reservation.start_reservation! }
           .to_not change { complete.reload.attributes }
+      end
+
+      it "does not trigger an email" do
+        expect { reservation.start_reservation! }.not_to change(ActionMailer::Base.deliveries, :count)
+      end
+    end
+
+    context "with a problem reservation (already moved to the problem queue)" do
+      let!(:problem) { create :setup_reservation, product: instrument, reserve_start_at: 2.hours.ago, reserve_end_at: 1.hour.ago, actual_start_at: 2.hours.ago }
+
+      before do
+        order = problem.order_detail.order
+        order.state = "validated"
+        order.purchase!
+        problem.complete!
+        expect(problem.order_detail).to be_problem
+      end
+
+      it "does nothing" do
+        expect { reservation.start_reservation! }
+          .to_not change { problem.reload.attributes }
+      end
+
+      it "does not trigger an email" do
+        expect { reservation.start_reservation! }.not_to change(ActionMailer::Base.deliveries, :count)
+      end
+    end
+
+    context "with an order that was problematic, but is canceled" do
+      let!(:problem) { create :setup_reservation, product: instrument, reserve_start_at: 2.hours.ago, reserve_end_at: 1.hour.ago, actual_start_at: 2.hours.ago }
+
+      before do
+        order = problem.order_detail.order
+        order.state = "validated"
+        order.purchase!
+        problem.complete!
+        expect(problem.order_detail).to be_problem
+        problem.order_detail.update_order_status!(create(:user), OrderStatus.canceled, admin: true)
+        expect(problem.order_detail).not_to be_problem
+      end
+
+      it "does not trigger an email" do
+        expect { reservation.start_reservation! }.not_to change(ActionMailer::Base.deliveries, :count)
       end
     end
   end

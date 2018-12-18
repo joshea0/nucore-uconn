@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe ReservationUserActionPresenter do
@@ -22,7 +24,7 @@ RSpec.describe ReservationUserActionPresenter do
     allow(reservation).to receive(:ongoing?).and_return false
   end
 
-  context '#view_edit_link' do
+  context "#view_edit_link" do
     let(:link) { double "link" }
 
     context "when not in a current facility" do
@@ -58,7 +60,7 @@ RSpec.describe ReservationUserActionPresenter do
     end
   end
 
-  context '#user_actions' do
+  context "#user_actions" do
     before :each do
       allow(order_detail).to receive(:reservation).and_return reservation
     end
@@ -135,7 +137,7 @@ RSpec.describe ReservationUserActionPresenter do
         end
 
         before :each do
-          expect(order_detail).to receive(:cancellation_fee).and_return 10
+          allow(presenter.canceler).to receive(:total_cost).and_return 10
         end
 
         it_behaves_like "it has a cancellation link with a confirmation"
@@ -151,7 +153,7 @@ RSpec.describe ReservationUserActionPresenter do
         end
 
         before :each do
-          expect(order_detail).to receive(:cancellation_fee).and_return 0
+          allow(presenter.canceler).to receive(:total_cost).and_return 0
         end
 
         it_behaves_like "it has a cancellation link with a confirmation"

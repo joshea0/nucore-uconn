@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe OrderDetails::DisputeResolvedNotifier do
@@ -35,7 +37,7 @@ RSpec.describe OrderDetails::DisputeResolvedNotifier do
               [order_detail.dispute_by.email],
               [order_detail.account.owner_user.email],
               [business_administrator.email],
-        ))
+            ))
     end
   end
 

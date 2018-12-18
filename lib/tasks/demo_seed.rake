@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This file contains a base set of data appropriate for development or testing.
 # The data can then be loaded with the rake db:bi_seed.
 #
@@ -588,12 +590,5 @@ namespace :demo do
     order_detail.actual_cost    = costs[:cost]
     order_detail.actual_subsidy = costs[:subsidy]
     order_detail.save!
-  end
-
-  def dump_record(model)
-    if model.new_record?
-      puts "#{model.class.name} CREATE FAILED!"
-      model.errors.full_messages.each { |m| puts m }
-    end
   end
 end

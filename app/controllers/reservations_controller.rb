@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ReservationsController < ApplicationController
 
   include Timelineable
@@ -100,7 +102,7 @@ class ReservationsController < ApplicationController
       @reservation = creator.reservation
       authorize! :create, @reservation
       flash[:notice] = I18n.t "controllers.reservations.create.success"
-      flash[:error] = I18n.t('controllers.reservations.create.admin_hold_warning') if creator.reservation.conflicting_admin_reservation?
+      flash[:error] = I18n.t("controllers.reservations.create.admin_hold_warning") if creator.reservation.conflicting_admin_reservation?
 
       if creator.merged_order?
         redirect_to facility_order_path(@order_detail.facility, @order_detail.order.merge_order || @order_detail.order)

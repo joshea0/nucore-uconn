@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Reports
 
   class InstrumentUnavailableReport
@@ -30,7 +32,7 @@ module Reports
     end
 
     def total_hours
-      format("%.2f", rows.map { |row| BigDecimal.new(row[HOURS_INDEX]) }.sum)
+      format("%.2f", rows.map { |row| BigDecimal(row[HOURS_INDEX]) }.sum)
     end
 
     def total_quantity

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180406211501) do
+ActiveRecord::Schema.define(version: 20181119211456) do
 
   create_table "account_users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer  "account_id",            null: false
@@ -160,6 +160,7 @@ ActiveRecord::Schema.define(version: 20180406211501) do
     t.boolean  "show_instrument_availability",               default: false, null: false
     t.string   "order_notification_recipient"
     t.boolean  "sanger_sequencing_enabled",                  default: false, null: false
+    t.text     "banner_notice",                limit: 65535
     t.index ["abbreviation"], name: "index_facilities_on_abbreviation", unique: true, using: :btree
     t.index ["is_active", "name"], name: "index_facilities_on_is_active_and_name", using: :btree
     t.index ["name"], name: "index_facilities_on_name", unique: true, using: :btree
@@ -174,6 +175,14 @@ ActiveRecord::Schema.define(version: 20180406211501) do
     t.datetime "created_at",                 null: false
     t.integer  "revenue_account",            null: false
     t.index ["facility_id"], name: "fk_facilities", using: :btree
+  end
+
+  create_table "instrument_alerts", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer  "instrument_id",             null: false
+    t.string   "note",          limit: 256, null: false
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
+    t.index ["instrument_id"], name: "index_instrument_alerts_on_instrument_id", using: :btree
   end
 
   create_table "instrument_statuses", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -393,20 +402,24 @@ ActiveRecord::Schema.define(version: 20180406211501) do
   end
 
   create_table "price_policies", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string   "type",              limit: 50,                                          null: false
+    t.string   "type",                    limit: 50,                                           null: false
     t.integer  "product_id"
-    t.integer  "price_group_id",                                                        null: false
-    t.boolean  "can_purchase",                                          default: false, null: false
-    t.datetime "start_date",                                                            null: false
-    t.decimal  "unit_cost",                    precision: 10, scale: 2
-    t.decimal  "unit_subsidy",                 precision: 10, scale: 2
-    t.decimal  "usage_rate",                   precision: 12, scale: 4
-    t.decimal  "minimum_cost",                 precision: 10, scale: 2
-    t.decimal  "cancellation_cost",            precision: 10, scale: 2
-    t.decimal  "usage_subsidy",                precision: 12, scale: 4
-    t.datetime "expire_date",                                                           null: false
+    t.integer  "price_group_id",                                                               null: false
+    t.boolean  "can_purchase",                                                 default: false, null: false
+    t.datetime "start_date",                                                                   null: false
+    t.decimal  "unit_cost",                           precision: 10, scale: 2
+    t.decimal  "unit_subsidy",                        precision: 10, scale: 2
+    t.decimal  "usage_rate",                          precision: 12, scale: 4
+    t.decimal  "minimum_cost",                        precision: 10, scale: 2
+    t.decimal  "cancellation_cost",                   precision: 10, scale: 2
+    t.decimal  "usage_subsidy",                       precision: 12, scale: 4
+    t.datetime "expire_date",                                                                  null: false
     t.string   "charge_for"
     t.string   "legacy_rates"
+    t.boolean  "full_price_cancellation",                                      default: false, null: false
+    t.string   "note",                    limit: 256
+    t.integer  "created_by_id"
+    t.index ["created_by_id"], name: "index_price_policies_on_created_by_id", using: :btree
     t.index ["price_group_id"], name: "fk_rails_74aa223960", using: :btree
     t.index ["product_id"], name: "index_price_policies_on_product_id", using: :btree
   end
@@ -448,34 +461,35 @@ ActiveRecord::Schema.define(version: 20180406211501) do
   end
 
   create_table "products", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string   "type",                         limit: 50,                       null: false
-    t.integer  "facility_id",                                                   null: false
-    t.string   "name",                         limit: 200,                      null: false
-    t.string   "url_name",                     limit: 50,                       null: false
-    t.text     "description",                  limit: 65535
+    t.string   "type",                          limit: 50,                       null: false
+    t.integer  "facility_id",                                                    null: false
+    t.string   "name",                          limit: 200,                      null: false
+    t.string   "url_name",                      limit: 50,                       null: false
+    t.text     "description",                   limit: 65535
     t.integer  "schedule_id"
-    t.boolean  "requires_approval",                                             null: false
+    t.boolean  "requires_approval",                                              null: false
     t.integer  "initial_order_status_id"
-    t.boolean  "is_archived",                                                   null: false
-    t.boolean  "is_hidden",                                                     null: false
-    t.datetime "created_at",                                                    null: false
-    t.datetime "updated_at",                                                    null: false
+    t.boolean  "is_archived",                                                    null: false
+    t.boolean  "is_hidden",                                                      null: false
+    t.datetime "created_at",                                                     null: false
+    t.datetime "updated_at",                                                     null: false
     t.integer  "min_reserve_mins"
     t.integer  "max_reserve_mins"
     t.integer  "min_cancel_hours"
     t.integer  "facility_account_id"
-    t.string   "account",                      limit: 5
-    t.boolean  "show_details",                               default: false,    null: false
+    t.string   "account",                       limit: 5
+    t.boolean  "show_details",                                default: false,    null: false
     t.integer  "auto_cancel_mins"
     t.string   "contact_email"
     t.integer  "reserve_interval"
-    t.integer  "lock_window",                                default: 0,        null: false
-    t.text     "training_request_contacts",    limit: 65535
-    t.integer  "cutoff_hours",                               default: 0,        null: false
+    t.integer  "lock_window",                                 default: 0,        null: false
+    t.text     "training_request_contacts",     limit: 65535
+    t.integer  "cutoff_hours",                                default: 0,        null: false
     t.string   "dashboard_token"
-    t.string   "user_notes_field_mode",                      default: "hidden", null: false
+    t.string   "user_notes_field_mode",                       default: "hidden", null: false
     t.string   "user_notes_label"
     t.string   "order_notification_recipient"
+    t.text     "cancellation_email_recipients", limit: 65535
     t.index ["dashboard_token"], name: "index_products_on_dashboard_token", using: :btree
     t.index ["facility_account_id"], name: "fk_facility_accounts", using: :btree
     t.index ["facility_id"], name: "fk_rails_0c9fa1afbe", using: :btree
@@ -626,13 +640,14 @@ ActiveRecord::Schema.define(version: 20180406211501) do
 
   create_table "secure_rooms_events", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer  "card_reader_id",  null: false
-    t.integer  "user_id",         null: false
+    t.integer  "user_id"
     t.datetime "occurred_at"
     t.string   "outcome"
     t.string   "outcome_details"
     t.datetime "created_at",      null: false
     t.datetime "updated_at",      null: false
     t.integer  "account_id"
+    t.string   "card_number",     null: false
     t.index ["account_id"], name: "index_secure_rooms_events_on_account_id", using: :btree
     t.index ["card_reader_id"], name: "index_secure_rooms_events_on_card_reader_id", using: :btree
     t.index ["user_id"], name: "index_secure_rooms_events_on_user_id", using: :btree
@@ -745,8 +760,11 @@ ActiveRecord::Schema.define(version: 20180406211501) do
     t.integer  "uid"
     t.datetime "suspended_at"
     t.string   "card_number"
+    t.datetime "expired_at"
+    t.string   "expired_note"
     t.index ["card_number"], name: "index_users_on_card_number", using: :btree
     t.index ["email"], name: "index_users_on_email", unique: true, using: :btree
+    t.index ["expired_at"], name: "index_users_on_expired_at", using: :btree
     t.index ["uid"], name: "index_users_on_uid", using: :btree
     t.index ["username"], name: "index_users_on_username", unique: true, using: :btree
   end
@@ -825,6 +843,7 @@ ActiveRecord::Schema.define(version: 20180406211501) do
   add_foreign_key "price_group_members", "users"
   add_foreign_key "price_groups", "facilities"
   add_foreign_key "price_policies", "price_groups"
+  add_foreign_key "price_policies", "users", column: "created_by_id"
   add_foreign_key "product_users", "products", name: "fk_products"
   add_foreign_key "product_users", "users"
   add_foreign_key "products", "facilities"

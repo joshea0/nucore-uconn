@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 unless Rails.env.test? || Rails.env.development?
   Nucore::Application.configure do
-    config.lograge.enabled = true
+    config.lograge.enabled = false
     config.lograge.formatter = Lograge::Formatters::Logstash.new
 
     # Add params to the log

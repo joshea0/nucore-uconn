@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe OrderDetailsController do
@@ -122,6 +124,14 @@ RSpec.describe OrderDetailsController do
           end
 
           it { expect(order_detail.reload).to be_canceled }
+        end
+
+        context "and the cancellation notification recipients is set" do
+          before { reservation.product.update(cancellation_email_recipients: "cancel@example.com") }
+
+          it "triggers an email" do
+            expect { put :cancel, params: { order_id: order.id, id: order_detail.id } }.to change(ActionMailer::Base.deliveries, :count).by(1)
+          end
         end
 
         context "and I am an administrator on the account, but do not own the order" do

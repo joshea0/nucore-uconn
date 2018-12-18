@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe SecureRooms::CheckAccess, type: :service do
@@ -21,6 +23,11 @@ RSpec.describe SecureRooms::CheckAccess, type: :service do
 
     let(:card_reader) { build(:card_reader, secure_room: secure_room) }
     let(:exit_card_reader) { build(:card_reader, :exit, secure_room: secure_room) }
+
+    context "when a user is not present" do
+      let(:card_user) { nil }
+      it { is_expected.to be_denied }
+    end
 
     describe "a global admin" do
       let(:card_user) { build(:user, :administrator) }

@@ -44,6 +44,7 @@ jobs:
       - run: bundle exec rake db:schema:load
 
       - run:
+          shell: /bin/bash -eo pipefail -O globstar
           command: |
             bundle exec rspec --profile 10 \
                               --format RspecJunitFormatter \
