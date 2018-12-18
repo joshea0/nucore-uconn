@@ -65,7 +65,7 @@ jobs:
        # Deploy if we are on the specified deployment branch
       - add_ssh_keys
       - deploy:
-          name: Deploy to staging if branch is develop
+          name: Deploy to staging if branch is BRANCH_TO_DEPLOY_TO_PRODUCTION
           command: |
              if [ "${CIRCLE_BRANCH}" == "${BRANCH_TO_DEPLOY_TO_PRODUCTION}" ]; then
                eval `ssh-agent` && ssh-add ~/.ssh/id_rsa* && bundle exec cap production deploy
