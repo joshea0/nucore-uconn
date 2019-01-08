@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 require "controller_spec_helper"
 
@@ -151,7 +153,7 @@ RSpec.describe ProductAccessoriesController do
       end
 
       it "soft deletes the accessory" do
-        expect(assigns(:product_accessory)).to be_deleted
+        expect(assigns(:product_accessory).deleted_at).to be_present
       end
 
       it "redirects to index" do

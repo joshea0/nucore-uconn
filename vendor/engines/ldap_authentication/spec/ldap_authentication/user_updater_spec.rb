@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe LdapAuthentication::UserUpdater do
@@ -8,10 +10,6 @@ RSpec.describe LdapAuthentication::UserUpdater do
   before do
     allow(LdapAuthentication::UserEntry).to receive(:find).with("abc123").and_return(user_entry)
     allow(LdapAuthentication::UserEntry).to receive(:find).with("xyz789").and_return(nil)
-  end
-
-  def update_user(user)
-    described_class.new(user).update_from_ldap
   end
 
   it "updates the attributes after successful ldap authentication" do

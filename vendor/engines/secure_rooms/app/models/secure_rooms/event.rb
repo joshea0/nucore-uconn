@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SecureRooms
 
   class Event < ApplicationRecord
@@ -7,7 +9,7 @@ module SecureRooms
     belongs_to :card_reader
     belongs_to :user
 
-    validates :card_reader, :user, :occurred_at, :outcome, presence: true
+    validates :card_reader, :occurred_at, :outcome, presence: true
 
     delegate :direction, :secure_room, :ingress?, :egress?, to: :card_reader
 

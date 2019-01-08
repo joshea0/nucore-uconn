@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe Product do
@@ -60,7 +62,7 @@ RSpec.describe Product do
                     product: instrument,
                     start_date: 3.days.ago,
                     expire_date: 3.days.from_now
-                   )
+                  )
       end
 
       let!(:past_price_policies) do
@@ -213,6 +215,10 @@ RSpec.describe Product do
 
         def rate_field
           :unit_cost
+        end
+
+        def note
+          "I am a note and I am present"
         end
 
       end
@@ -397,7 +403,7 @@ RSpec.describe Product do
       end
     end
 
-    context '#access_group_for_user' do
+    context "#access_group_for_user" do
       context "with an access group" do
         before :each do
           schedule_rule.product_access_groups = [access_group]
@@ -459,7 +465,7 @@ RSpec.describe Product do
       end
     end
 
-    context '#find_product_user' do
+    context "#find_product_user" do
       context "when a user is a product user" do
         it "finds the product_user" do
           expect(product.find_product_user(user)).to eq product_user
@@ -475,7 +481,7 @@ RSpec.describe Product do
       end
     end
 
-    context '#has_access_list?' do
+    context "#has_access_list?" do
       context "when its type supports access groups" do
         context "when it has an access group" do
           before :each do

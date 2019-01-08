@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe StatementPresenter do
@@ -39,7 +41,7 @@ RSpec.describe StatementPresenter do
 
   describe "#sent_at" do
     it "returns the statement's formatted creation time" do
-      expect(subject.sent_at).to eq("10/14/2015  5:41 PM")
+      expect(subject.sent_at).to eq("10/14/2015 5:41 PM")
     end
   end
 

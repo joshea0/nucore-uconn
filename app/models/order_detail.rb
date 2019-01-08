@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OrderDetail < ApplicationRecord
 
   include NUCore::Database::SortHelper
@@ -106,19 +108,7 @@ class OrderDetail < ApplicationRecord
   validate :account_usable_by_order_owner?, if: ->(o) { o.account_id_changed? || o.order.nil? || o.order.ordered_at.nil? }
   validates_length_of :note, maximum: 1000, allow_blank: true, allow_nil: true
   validate :valid_manual_fulfilled_at
-  validate :require_pricing_note
-
-  def require_pricing_note
-    return unless @manually_priced && SettingsHelper.feature_on?(:price_change_reason_required)
-    return if cost_estimated?
-    return if canceled_at?
-
-    errors.add(:price_change_reason, :blank) if price_change_reason.blank? && actual_costs_differ_from_calculated?
-  end
-
-  def actual_costs_differ_from_calculated?
-    !actual_costs_match_calculated?
-  end
+  validates :price_change_reason, presence: true, length: { minimum: 10, allow_blank: true }, if: :pricing_note_required?
 
   def actual_costs_match_calculated?
     dup_od = dup
@@ -149,26 +139,13 @@ class OrderDetail < ApplicationRecord
     end
   end
 
-  def self.for_facility_url(facility_url)
-    details = all.joins(:order)
-
-    unless facility_url.nil?
-      details = details.joins(order: :facility)
-      details = details.where(facilities: { url_name: facility_url })
-    end
-
-    details
-  end
-
   def self.in_dispute
     where("dispute_at IS NOT NULL")
       .where(dispute_resolved_at: nil)
       .where("order_details.state != ?", "canceled")
   end
 
-  def self.purchased_active_reservations
-    pending.joins(:reservation).merge(Reservation.not_canceled)
-  end
+  scope :purchased_active_reservations, -> { new_or_inprocess.joins(:reservation).merge(Reservation.not_canceled) }
 
   scope :with_price_policy, -> { where.not(price_policy_id: nil) }
 
@@ -276,8 +253,6 @@ class OrderDetail < ApplicationRecord
   scope :reservations, -> { for_product_type("Instrument") }
 
   scope :purchased, -> { joins(:order).merge(Order.purchased) }
-
-  scope :pending, -> { joins(:order).where(state: %w(new inprocess)).purchased }
 
   scope :with_reservation, -> { purchased.joins(:reservation).order("reservations.reserve_start_at DESC") }
   scope :with_upcoming_reservation, lambda {
@@ -441,10 +416,6 @@ class OrderDetail < ApplicationRecord
     change_status!(OrderStatus.complete)
   end
 
-  def force_complete!
-    update(state: "complete", order_status: OrderStatus.complete)
-  end
-
   def backdate_to_complete!(event_time = Time.zone.now)
     # if we're setting it to compete, automatically set the actuals for a reservation
     if reservation
@@ -484,6 +455,10 @@ class OrderDetail < ApplicationRecord
     state_is_cancelable? && journal.nil? && !has_uncanceled_reservation?
   end
 
+  def pending?
+    order.purchased? && state.in?(%w[new inprocess])
+  end
+
   delegate :ordered_on_behalf_of?, to: :order
 
   def cost
@@ -510,12 +485,6 @@ class OrderDetail < ApplicationRecord
     groups = user.price_groups
     groups += account.price_groups if account
     groups.uniq
-  end
-
-  # set the object's response_set
-  def response_set!(response_set)
-    self.response_set = response_set
-    save
   end
 
   # returns true if the associated survey response set has been completed
@@ -547,7 +516,7 @@ class OrderDetail < ApplicationRecord
     return "The account is expired and cannot be used" if account.expires_at < Time.zone.now || account.suspended_at
 
     # TODO: if chart string, is chart string + account valid
-    return "The #{account.type_string} is not open for the required account" if account.respond_to?(:account_open?) && !account.account_open?(product.account)
+    return I18n.t("not_open", model: account.type_string, scope: "activerecord.errors.models.account") if account.respond_to?(:account_open?) && !account.account_open?(product.account)
 
     # is the user approved for the product
     return "You are not approved to purchase this #{product.class.name.downcase}" unless product.can_be_used_by?(order.user) || order.created_by_user.can_override_restrictions?(product)
@@ -737,18 +706,7 @@ class OrderDetail < ApplicationRecord
   end
 
   def cancellation_fee
-    assign_price_policy unless price_policy
-
-    return 0 unless reservation && price_policy && product.min_cancel_hours.to_i > 0
-    if outside_cancellation_window?
-      0
-    else
-      price_policy.cancellation_cost.to_f
-    end
-  end
-
-  def outside_cancellation_window?(time = Time.current)
-    reservation.reserve_start_at - time > product.min_cancel_hours.hours
+    CancellationFeeCalculator.new(self).total_cost
   end
 
   def has_subsidies?
@@ -920,12 +878,23 @@ class OrderDetail < ApplicationRecord
   end
 
   def cancel_with_fee(order_status)
-    fee = cancellation_fee
-    self.actual_cost = fee
-    self.actual_subsidy = 0
-    change_status!(fee > 0 ? OrderStatus.complete : order_status)
-    save! if changed? # If the cancel goes from complete => complete, change status doesn't save
-    true
+    assign_price_policy unless price_policy
+
+    calculator = CancellationFeeCalculator.new(self)
+
+    change_status!(calculator.total_cost > 0 ? OrderStatus.complete : order_status)
+
+    if calculator.costs.present?
+      assign_attributes(
+        actual_cost: calculator.costs[:cost],
+        actual_subsidy: calculator.costs[:subsidy],
+      )
+    end
+
+    # If the status did not change in change_status! (e.g. it was complete, but
+    # then changed to complete with cancellation fee), then it doesn't trigger a save,
+    # so we need to do it ourselves.
+    save!
   end
 
   def mark_dispute_resolved
@@ -968,6 +937,13 @@ class OrderDetail < ApplicationRecord
   def set_reconciled_at
     # Do not override it if it has been set by something already (e.g. journaling)
     self.reconciled_at ||= Time.current
+  end
+
+  def pricing_note_required?
+    return false unless @manually_priced && SettingsHelper.feature_on?(:price_change_reason_required)
+    return false if cost_estimated? || canceled_at?
+
+    !actual_costs_match_calculated?
   end
 
 end

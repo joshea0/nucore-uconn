@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Teaspoon.configure do |config|
   # Determines where the Teaspoon routes will be mounted. Changing this to "/jasmine" would allow you to browse to
   # `http://localhost:3000/jasmine` to run your tests.
@@ -83,7 +85,7 @@ Teaspoon.configure do |config|
 
   config.suite :engines do |suite|
     engine_names = EngineManager.loaded_nucore_engines.map { |e| e.name.underscore.split("/engine").first }
-    suite.matcher = "vendor/engines/{#{engine_names.join(",")}}/spec/javascripts/**/*_spec.{js,js.coffee,coffee}"
+    suite.matcher = "vendor/engines/{#{engine_names.join(',')}}/spec/javascripts/**/*_spec.{js,js.coffee,coffee}"
   end
 
   # CONSOLE RUNNER SPECIFIC

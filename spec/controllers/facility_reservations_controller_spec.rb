@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 require "controller_spec_helper"
 require "order_detail_batch_update_shared_examples"
@@ -40,7 +42,7 @@ RSpec.describe FacilityReservationsController do
     @params = { facility_id: @authable.url_name, order_id: @order.id, order_detail_id: @order_detail.id, id: @reservation.id }
   end
 
-  context '#assign_price_policies_to_problem_orders' do
+  context "#assign_price_policies_to_problem_orders" do
     let(:order_details) { [@order_detail] }
     let(:order_detail_ids) { order_details.map(&:id) }
 
@@ -159,7 +161,7 @@ RSpec.describe FacilityReservationsController do
     end
   end
 
-  context '#index' do
+  context "#index" do
     before :each do
       @method = :get
       @action = :index
@@ -188,7 +190,7 @@ RSpec.describe FacilityReservationsController do
     end
   end
 
-  context '#new' do
+  context "#new" do
     before :each do
       @method = :get
       @action = :new
@@ -198,7 +200,7 @@ RSpec.describe FacilityReservationsController do
     it_should_allow_operators_only
   end
 
-  context '#show' do
+  context "#show" do
     before :each do
       @method = :get
       @action = :show
@@ -207,11 +209,11 @@ RSpec.describe FacilityReservationsController do
     it_should_allow_operators_only
   end
 
-  context '#show_problems' do
+  context "#show_problems" do
     skip "TODO test exists for the FacilityOrdersController version"
   end
 
-  context '#timeline' do
+  context "#timeline" do
     context "instrument listing" do
       before :each do
         @instrument2 = FactoryBot.create(:instrument,
@@ -301,7 +303,7 @@ RSpec.describe FacilityReservationsController do
     end
   end
 
-  context '#update' do
+  context "#update" do
     let(:reserve_start_at) { FactoryBot.attributes_for(:reservation)[:reserve_start_at] }
     let(:reservation_params) do
       {
@@ -375,7 +377,7 @@ RSpec.describe FacilityReservationsController do
       @params = { facility_id: @authable.url_name, instrument_id: @product.url_name, reservation_id: @reservation.id }
     end
 
-    context '#edit_admin' do
+    context "#edit_admin" do
       before :each do
         @method = :get
         @action = :edit_admin
@@ -384,7 +386,7 @@ RSpec.describe FacilityReservationsController do
       it_should_allow_operators_only
     end
 
-    context '#update_admin' do
+    context "#update_admin" do
       let(:reserve_start_at) { FactoryBot.attributes_for(:admin_reservation)[:reserve_start_at] }
       let(:admin_reservation_params) do
         {

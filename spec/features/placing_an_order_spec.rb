@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe "Placing an item order" do
@@ -32,7 +34,7 @@ RSpec.describe "Placing an item order" do
       add_to_cart
       click_button "Purchase"
       expect(page).to have_content "Order Receipt"
-      expect(page).to have_content "Ordered By#{user.full_name}"
+      expect(page).to have_content "Ordered By\n#{user.full_name}"
       expect(page).to have_content "$33.25"
     end
 

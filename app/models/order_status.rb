@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OrderStatus < ApplicationRecord
 
   acts_as_nested_set
@@ -55,10 +57,6 @@ class OrderStatus < ApplicationRecord
 
   def is_left_of?(o)
     rgt < o.lft
-  end
-
-  def is_right_of?(o)
-    lft > o.rgt
   end
 
   def name_with_level

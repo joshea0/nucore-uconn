@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class NavTab::LinkCollection
 
   include Rails.application.routes.url_helpers
@@ -8,7 +10,7 @@ class NavTab::LinkCollection
   delegate :single_facility?, to: :facility
 
   def initialize(facility, ability)
-    @facility = facility
+    @facility = facility || Facility.cross_facility
     @ability = ability
   end
 
@@ -25,15 +27,19 @@ class NavTab::LinkCollection
   end
 
   def admin
-    default + admin_only
+    admin_only
   end
 
   def customer
-    default + [orders, reservations, payment_sources, files]
+    [orders, reservations, payment_sources, files]
   end
 
-  def default
-    [home]
+  def home_button
+    if SettingsHelper.feature_on?(:use_manage)
+      use
+    else
+      home
+    end
   end
 
   private
@@ -129,8 +135,13 @@ class NavTab::LinkCollection
     )
   end
 
-  def home
-    NavTab::Link.new(tab: :home, url: root_path)
+  def use
+    url = facility ? facility_path(facility) : root_path
+    NavTab::Link.new(tab: :use, url: url)
+  end
+
+  def manage
+    NavTab::Link.new(text: I18n.t("pages.manage", model: Facility.model_name.human(count: 2)), url: list_facilities_url)
   end
 
   def instrument_utilization_reports
@@ -150,6 +161,10 @@ class NavTab::LinkCollection
       text: t_my(Reservation),
       url: reservations_path,
     )
+  end
+
+  def home
+    NavTab::Link.new(tab: :home, url: root_path)
   end
 
 end

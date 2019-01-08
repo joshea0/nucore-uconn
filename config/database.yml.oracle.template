@@ -1,15 +1,13 @@
 defaults: &defaults
   adapter: oracle_enhanced
-  username: nucore_open_development
+  database: (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=1521))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=ORCLCDB.localdomain)))
+  encoding: utf8
   password: password
-  database: localhost:1521/xe
 
 development:
   <<: *defaults
-  username: nucore_open_development
-  password: password
+  username: "c##nucore_open_development"
 
 test:
   <<: *defaults
-  username: nucore_open_test
-  password: password
+  username: "c##nucore_open_test"

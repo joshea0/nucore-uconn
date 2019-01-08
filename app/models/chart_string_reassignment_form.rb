@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ChartStringReassignmentForm
 
   include ActiveModel::Conversion
@@ -8,10 +10,6 @@ class ChartStringReassignmentForm
   def initialize(order_details)
     @order_details = order_details
     @available_accounts = available_accounts
-  end
-
-  def available_accounts?
-    @available_accounts.any?
   end
 
   def available_accounts

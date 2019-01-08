@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe "Facility Orders Search" do
@@ -28,8 +30,8 @@ RSpec.describe "Facility Orders Search" do
 
       select instrument, from: "Products"
       click_button "Filter"
-      expect(page).to have_css('.order-detail-description', text: instrument.name, count: 1)
-      expect(page).not_to have_css('.order-detail-description', text: instrument2.name)
+      expect(page).to have_css(".order-detail-description", text: instrument.name, count: 1)
+      expect(page).not_to have_css(".order-detail-description", text: instrument2.name)
     end
   end
 
@@ -40,8 +42,8 @@ RSpec.describe "Facility Orders Search" do
 
       select instrument, from: "Products"
       click_button "Filter"
-      expect(page).to have_css('td', text: instrument.name, count: 1)
-      expect(page).not_to have_css('td', text: instrument2.name)
+      expect(page).to have_css("td", text: instrument.name, count: 1)
+      expect(page).not_to have_css("td", text: instrument2.name)
     end
   end
 end

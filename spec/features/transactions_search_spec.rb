@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe "Transactions Search" do
@@ -28,8 +30,8 @@ RSpec.describe "Transactions Search" do
 
       select accounts.first.description, from: "Payment Sources"
       click_button "Filter"
-      expect(page).to have_css('td', text: accounts.first.description, count: 2)
-      expect(page).not_to have_css('td', text: accounts.last.description, count: 2)
+      expect(page).to have_css("td", text: accounts.first.description, count: 2)
+      expect(page).not_to have_css("td", text: accounts.last.description, count: 2)
     end
   end
 
@@ -54,8 +56,8 @@ RSpec.describe "Transactions Search" do
 
       select accounts.first.description, from: "Payment Sources"
       click_button "Filter"
-      expect(page).to have_css('td', text: accounts.first.description, count: 2)
-      expect(page).not_to have_css('td', text: accounts.last.description, count: 2)
+      expect(page).to have_css("td", text: accounts.first.description, count: 2)
+      expect(page).not_to have_css("td", text: accounts.last.description, count: 2)
     end
   end
 

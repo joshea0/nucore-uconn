@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 overridable_factory :nufs_account do
   sequence(:account_number, "0000000") do |n|
     "999-#{n}" # fund3-dept7
@@ -5,7 +7,7 @@ overridable_factory :nufs_account do
 
   sequence(:description, "aaaaaaaa") { |n| "nufs account #{n}" }
   expires_at { Time.zone.now + 1.month }
-  created_by 0
+  created_by { 0 }
 end
 
 FactoryBot.modify do
@@ -14,7 +16,7 @@ FactoryBot.modify do
       with_account_owner
 
       transient do
-        product nil
+        product { nil }
       end
 
       account_users_attributes { [FactoryBot.attributes_for(:account_user, user: owner)] }

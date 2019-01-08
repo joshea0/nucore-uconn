@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SecureRoom < Product
 
   include Products::ScheduleRuleSupport
@@ -9,10 +11,6 @@ class SecureRoom < Product
 
   before_validation :set_secure_room_defaults, on: :create
   validates :dashboard_token, presence: true
-
-  def time_data_for(order_detail)
-    order_detail.occupancy
-  end
 
   def time_data_field
     :occupancy
