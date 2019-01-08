@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProductAccessory < ApplicationRecord
 
   SCALING_TYPES = {
@@ -29,10 +31,6 @@ class ProductAccessory < ApplicationRecord
 
   def soft_delete
     update_attribute :deleted_at, Time.zone.now
-  end
-
-  def deleted?
-    deleted_at.present?
   end
 
 end

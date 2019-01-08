@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 require "controller_spec_helper"
 require "report_spec_helper"
@@ -52,10 +54,6 @@ RSpec.describe Reports::InstrumentDayReportsController do
       # Float(data) will raise an error if it's not a valid number
       row[1..-1].all? { |data| expect(Float(data)).to be_is_a(Numeric) }
     end
-  end
-
-  def assert_report_data_init(_label)
-    expect(assigns(:report_data)).to eq(Reservation.all)
   end
 
 end

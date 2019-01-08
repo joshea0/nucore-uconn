@@ -1,4 +1,10 @@
+# frozen_string_literal: true
+
 class AffiliatesController < GlobalSettingsController
+
+  def index
+    @affiliates = Affiliate.alphabetical.destroyable
+  end
 
   def new
     @affiliate = Affiliate.new

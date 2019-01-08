@@ -1,7 +1,7 @@
 /* These are default vaules. Override them in nucore-overrides.scss */
 
 /* Header */
-$headerFont: Georgia, 'Times New Roman', Times, serif;
+$headerFont: 'WorkSans', 'Times New Roman', Times, serif;
 $headerColor: black;
 $headerBackgroundColor: white;
 $headerBackgroundColorHighLight: darken($headerBackgroundColor, 5%);
@@ -20,3 +20,37 @@ $sidebarActiveBackgroundColor: $linkColor;
 $sidebarActiveBackgroundColorHighlight: darken($sidebarActiveBackgroundColor, 5%);
 
 $sidebarActiveColor: $white;
+
+// Shared
+$darkGrey: #3F3B26;
+$grey: #9B9B9B;
+$lightGrey: #D4D1D1;
+$lighterGrey: #F3F3F3;
+
+// Manage Mode
+$darkOrange: #FF7126;
+$orange: #F89662;
+$lightOrange: #FFAE84;
+
+// Use mode
+$darkBlue: #4A9FF7;
+$blue: #C2DCF8;
+$lightBlue: #CDE4FC;
+
+$headerColor: $darkGrey;
+
+$manageColorLight: $lightBlue;
+$manageColor: $blue;
+$manageColorDark: $darkBlue;
+
+$useColorLight: $lightOrange;
+$useColor: $orange;
+$useColorDark: $darkOrange;
+
+$manageGradient: $lightBlue;
+
+$tableRowEven: rgb(247, 247, 247);
+$tableRowOdd: white;
+$tableRowHover: rgb(224, 224, 224);
+
+$fontSpacing: -0.6px;

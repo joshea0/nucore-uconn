@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe "Managing an order detail" do
@@ -44,7 +46,7 @@ RSpec.describe "Managing an order detail" do
         click_button "Save"
 
         expect(page).to have_content("Canceled")
-        expect(page).to have_css('tfoot .currency', text: "$0.00", count: 3)
+        expect(page).to have_css("tfoot .currency", text: "$0.00", count: 3)
       end
     end
 
@@ -60,16 +62,16 @@ RSpec.describe "Managing an order detail" do
         click_button "Save"
 
         expect(page).to have_content("Canceled")
-        expect(page).to have_css('tfoot .currency', text: "$0.00", count: 3)
+        expect(page).to have_css("tfoot .currency", text: "$0.00", count: 3)
       end
 
       it "cancels with a fee" do
         select "Canceled", from: "Status"
-        check "Add reservation cost"
+        check I18n.t("facility_order_details.edit.label.with_cancel_fee")
         click_button "Save"
 
         expect(page).to have_content("Complete")
-        expect(page).to have_css('tfoot .currency', text: "$5.00", count: 2)
+        expect(page).to have_css("tfoot .currency", text: "$5.00", count: 2)
       end
     end
   end

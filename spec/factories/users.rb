@@ -1,14 +1,21 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :user do
     sequence(:username) { |n| "username#{n}" }
-    first_name "User"
-    password "password"
-    password_confirmation "password"
+    first_name { "User" }
+    password { "password" }
+    password_confirmation { "password" }
     sequence(:last_name, &:to_s)
     sequence(:email) { |n| "user#{n}@example.com" }
 
     trait :suspended do
       suspended_at { 1.day.ago }
+    end
+
+    trait :expired do
+      expired_at { 1.day.ago }
+      expired_note { "Expired" }
     end
 
     after(:create) do |user, _|
@@ -39,8 +46,8 @@ FactoryBot.define do
 
     trait :business_administrator do
       transient do
-        account nil
-        administrator nil
+        account { nil }
+        administrator { nil }
       end
 
       after(:create) do |user, evaluator|
@@ -48,13 +55,29 @@ FactoryBot.define do
           user,
           AccountUser::ACCOUNT_ADMINISTRATOR,
           evaluator.account,
-          evaluator.administrator || user,
+          by: evaluator.administrator || user,
+        )
+      end
+    end
+
+    trait :purchaser do
+      transient do
+        account { nil }
+        administrator { nil }
+      end
+
+      after(:create) do |user, evaluator|
+        AccountUser.grant(
+          user,
+          AccountUser::ACCOUNT_PURCHASER,
+          evaluator.account,
+          by: evaluator.administrator,
         )
       end
     end
 
     trait :facility_administrator do
-      transient { facility nil }
+      transient { facility { nil } }
 
       after(:create) do |user, evaluator|
         UserRole.create!(
@@ -66,7 +89,7 @@ FactoryBot.define do
     end
 
     trait :facility_director do
-      transient { facility nil }
+      transient { facility { nil } }
 
       after(:create) do |user, evaluator|
         UserRole.create!(
@@ -77,24 +100,8 @@ FactoryBot.define do
       end
     end
 
-    trait :purchaser do
-      transient do
-        account nil
-        administrator nil
-      end
-
-      after(:create) do |user, evaluator|
-        AccountUser.grant(
-          user,
-          AccountUser::ACCOUNT_PURCHASER,
-          evaluator.account,
-          evaluator.administrator,
-        )
-      end
-    end
-
     trait :senior_staff do
-      transient { facility nil }
+      transient { facility { nil } }
 
       after(:create) do |user, evaluator|
         UserRole.create!(
@@ -106,7 +113,7 @@ FactoryBot.define do
     end
 
     trait :staff do
-      transient { facility nil }
+      transient { facility { nil } }
 
       after(:create) do |user, evaluator|
         UserRole.create!(

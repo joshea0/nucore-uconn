@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source "https://rubygems.org"
 
 ruby File.open(File.expand_path(".ruby-version", File.dirname(__FILE__))) { |f| f.read.chomp }
@@ -32,7 +34,7 @@ gem "paranoia"
 ## views
 gem "sass-rails"
 gem "coffee-rails"
-gem "uglifier"
+gem "uglifier", "= 4.1.18" # 4.1.19 has an issue https://github.com/mishoo/UglifyJS2/issues/3245
 gem "therubyracer"
 gem "bootstrap-sass", "~> 2.3.2" # will not upgrade
 gem "haml"
@@ -80,10 +82,11 @@ gem "synaccess_connect"
 group :development do
   gem "bullet" # Detect N+1s and recommends eager loading
   gem "coffeelint"
-  gem "haml_lint"
+  gem "haml_lint", require: false
   gem "letter_opener"
   gem "rails-erd"
-  gem "rubocop", "0.54", require: false # needs to be updated in sync with available codeclimate channels
+  gem "rubocop", "0.58", require: false # needs to be updated in sync with available codeclimate channels
+  gem "rubocop-rspec"
   gem "web-console"
 end
 
@@ -93,12 +96,10 @@ group :development, :deployment do
   gem "capistrano-rvm",     require: false
   gem "capistrano-bundler", require: false
 
-  # net-ssh 4.2 requires the gems below to support ed25519 keys
-  # for deploying via capistrano
-  # more info at https://github.com/net-ssh/net-ssh/issues/478
+  # These gems are required to support ed25519 SSH keys for deploying via capistrano
+  # See https://github.com/net-ssh/net-ssh/issues/565 for more information
   gem "bcrypt_pbkdf", ">= 1.0", "< 2.0", require: false
-  gem "rbnacl", ">= 3.2", "< 5.0", require: false
-  gem "rbnacl-libsodium", require: false
+  gem "ed25519", ">= 1.2", "< 2.0", require: false
 end
 
 group :development, :test do

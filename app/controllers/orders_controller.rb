@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OrdersController < ApplicationController
 
   customer_tab  :all
@@ -301,7 +303,7 @@ class OrdersController < ApplicationController
     @available_statuses = %w(pending all)
     case params[:status]
     when "pending"
-      @order_details = @order_details.pending
+      @order_details = @order_details.new_or_inprocess
     when "all"
       @order_details = @order_details.purchased
     else

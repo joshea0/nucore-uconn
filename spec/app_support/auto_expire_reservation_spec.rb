@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe AutoExpireReservation, :time_travel do
@@ -7,8 +9,8 @@ RSpec.describe AutoExpireReservation, :time_travel do
   let(:order_detail) { reservation.order_detail }
   let(:instrument) { create(:setup_instrument, min_reserve_mins: 1, relay: create(:relay_syna)) }
 
-  describe '#perform' do
-    context "a new reservation" do
+  describe "#perform" do
+    context "a started reservation" do
       let!(:reservation) do
         create(:purchased_reservation, :yesterday, actual_start_at: 1.hour.ago,
                                                    product: instrument)
@@ -35,6 +37,30 @@ RSpec.describe AutoExpireReservation, :time_travel do
 
       it "sets the reservation fulfilled at time" do
         expect { action.perform }.to change { order_detail.reload.fulfilled_at }.to(reservation.reserve_end_at)
+      end
+
+      it "triggers an email" do
+        expect { action.perform }.to change(ActionMailer::Base.deliveries, :count).by(1)
+      end
+    end
+
+    context "a started reservation that is already in the problem queue" do
+      let!(:reservation) do
+        create(:purchased_reservation, :yesterday, actual_start_at: 1.hour.ago,
+                                                   product: instrument)
+      end
+
+      before do
+        reservation.product.price_policies.destroy_all
+        create :instrument_usage_price_policy, price_group: reservation.product.facility.price_groups.last, usage_rate: 1, product: reservation.product
+
+        reservation.actual_end_at = nil
+        reservation.order_detail.complete!
+        expect(reservation.order_detail).to be_problem
+      end
+
+      it "does not trigger an email" do
+        expect { action.perform }.not_to change(ActionMailer::Base.deliveries, :count)
       end
     end
 

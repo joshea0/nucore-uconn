@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PricePoliciesController < ApplicationController
 
   include DateHelper
@@ -125,7 +127,7 @@ class PricePoliciesController < ApplicationController
       @price_policies,
       parse_usa_date(params[:start_date])&.beginning_of_day,
       parse_usa_date(params[:expire_date])&.end_of_day,
-      params,
+      params.merge(created_by_id: current_user.id),
     )
   end
 

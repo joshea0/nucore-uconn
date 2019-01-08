@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Account < ApplicationRecord
 
   module Overridable
@@ -39,13 +41,7 @@ class Account < ApplicationRecord
   validates_presence_of :account_number, :description, :expires_at, :created_by, :type
   validates_length_of :description, maximum: 50
 
-  validate do |acct|
-    # a current account owner if required
-    # don't use a scope so we can validate on nested attributes
-    unless acct.account_users.any? { |au| au.deleted_at.nil? && au.user_role == AccountUser::ACCOUNT_OWNER }
-      acct.errors.add(:base, "Must have an account owner")
-    end
-  end
+  validate { errors.add(:base, :missing_owner) if missing_owner? }
 
   delegate :administrators, to: :account_users
 
@@ -176,10 +172,6 @@ class Account < ApplicationRecord
     self.expires_at = parse_usa_date(str) if str
   end
 
-  def account_pretty
-    to_s true
-  end
-
   def account_list_item
     "#{account_number} #{description}"
   end
@@ -194,7 +186,9 @@ class Account < ApplicationRecord
     # check chart string account number
     if respond_to?(:account_open?)
       accts = product.is_a?(Bundle) ? product.products.collect(&:account) : [product.account]
-      accts.uniq.each { |acct| return "The #{type_string} is not open for the required account" unless account_open?(acct) }
+      accts.uniq.each do |acct|
+        return I18n.t("not_open", model: type_string, scope: "activerecord.errors.models.account") unless account_open?(acct)
+      end
     end
 
     nil
@@ -232,10 +226,6 @@ class Account < ApplicationRecord
       balance += cost if cost
       balance
     end
-  end
-
-  def latest_facility_statement(facility)
-    statements.latest(facility).first
   end
 
   def update_order_details_with_statement(statement)
@@ -281,40 +271,15 @@ class Account < ApplicationRecord
     end
   end
 
-  def add_or_update_member(user, new_role, session_user)
-    Account.transaction do
-      # expire old owner if new
-      if new_role == AccountUser::ACCOUNT_OWNER
-        # expire old owner record
-        @old_owner = owner
-        if @old_owner
-          @old_owner.deleted_at = Time.zone.now
-          @old_owner.deleted_by = session_user.id
-          @old_owner.save!
-        end
-      end
-
-      # find non-deleted record for this user and account or init new one
-      # deleted_at MUST be nil to preserve existing audit trail
-      @account_user = AccountUser.find_or_initialize_by(account_id: id, user_id: user.id, deleted_at: nil)
-      # set (new?) role
-      @account_user.user_role = new_role
-      # set creation information
-      @account_user.created_by = session_user.id
-
-      account_users << @account_user
-
-      raise ActiveRecord::Rollback unless save
-    end
-
-    @account_user
-  end
-
   # Optionally override this method for models that inherit from Account.
   # Forces journal rows to be destroyed and recreated when an order detail is
   # updated.
   def recreate_journal_rows_on_order_detail_update?
     false
+  end
+
+  def missing_owner?
+    account_users.none? { |au| au.active? && au.owner? }
   end
 
   private

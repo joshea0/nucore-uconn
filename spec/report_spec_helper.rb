@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ReportSpecHelper
 
   include DateHelper
@@ -82,10 +84,6 @@ module ReportSpecHelper
   end
 
   def assert_report_init(_label)
-    raise "Including class must implement!"
-  end
-
-  def assert_report_data_init(_label)
     raise "Including class must implement!"
   end
 

@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 require "controller_spec_helper"
 
-RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price_change_reason_required: false } do
+RSpec.describe OrderManagement::OrderDetailsController do
   def reservation_params(reserve_start_at, actual_start_at = nil)
     params = {
       reserve_start_date: I18n.l(reserve_start_at.to_date, format: :usa),
@@ -84,16 +86,16 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
         end
 
         it "has estimated fields disabled" do
-          cost = dom.css('#order_detail_estimated_cost').first
+          cost = dom.css("#order_detail_estimated_cost").first
           expect(cost).to be_has_attribute("disabled")
           expect(cost["value"]).to_not be_blank
 
-          expect(dom.css('#order_detail_estimated_subsidy').first).to be_has_attribute("disabled")
-          expect(dom.css('#order_detail_estimated_total').first).to be_has_attribute("disabled")
+          expect(dom.css("#order_detail_estimated_subsidy").first).to be_has_attribute("disabled")
+          expect(dom.css("#order_detail_estimated_total").first).to be_has_attribute("disabled")
         end
 
         it "has assigned user enabled" do
-          expect(dom.css('#order_detail_assigned_user_id').first).to_not be_has_attribute("disabled")
+          expect(dom.css("#order_detail_assigned_user_id").first).to_not be_has_attribute("disabled")
         end
       end
 
@@ -112,13 +114,13 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
             end
 
             it "has actual fields" do
-              cost = dom.css('#order_detail_actual_cost').first
+              cost = dom.css("#order_detail_actual_cost").first
               expect(cost).to be_present
               expect(cost["value"]).to_not be_blank
             end
 
             it "has the subsidy field enabled" do
-              subsidy = dom.css('#order_detail_actual_subsidy').first
+              subsidy = dom.css("#order_detail_actual_subsidy").first
               expect(subsidy).to be_present
               expect(subsidy["value"]).to_not be_blank
               expect(subsidy).to_not be_has_attribute("disabled")
@@ -134,7 +136,7 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
             end
 
             it "has the subsidy field disabled" do
-              subsidy = dom.css('#order_detail_actual_subsidy').first
+              subsidy = dom.css("#order_detail_actual_subsidy").first
               expect(subsidy).to be_has_attribute("disabled")
             end
           end
@@ -155,7 +157,7 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
           end
 
           it "has estimated fields disabled" do
-            cost = dom.css('#order_detail_estimated_cost').first
+            cost = dom.css("#order_detail_estimated_cost").first
             expect(cost).to be_has_attribute("disabled")
             expect(cost["value"]).to be_blank
           end
@@ -502,7 +504,7 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
           describe "price change reason" do
             # the expected price (calculated from the price policy) is 1
 
-            context "with reason required off" do
+            context "with reason required off", feature_setting: { price_change_reason_required: false } do
               it "does not require a reason when the price is changed" do
                 @params[:order_detail] = {
                   actual_cost: "10",
@@ -513,15 +515,28 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
                 expect(assigns[:order_detail].errors).not_to include :price_change_reason
               end
             end
+
             context "with reason required on", feature_setting: { price_change_reason_required: true } do
               it "requires a reason when the price is changed from the expected price" do
                 @params[:order_detail] = {
                   actual_cost: "10",
                   actual_subsidy: order_detail.actual_subsidy,
+                  price_change_reason: "",
                 }
                 do_request
 
-                expect(assigns[:order_detail].errors).to include :price_change_reason
+                expect(assigns[:order_detail].errors).to be_added(:price_change_reason, :blank)
+                expect(assigns[:order_detail].errors).not_to be_added(:price_change_reason, :too_short, count: 10)
+              end
+
+              it "requires the reason to be at least 10 characters long" do
+                @params[:order_detail] = {
+                  actual_cost: "10",
+                  price_change_reason: "123456789",
+                }
+                do_request
+
+                expect(assigns[:order_detail].errors).to be_added(:price_change_reason, :too_short, count: 10)
               end
 
               it "does not require a reason if the price matches the expected price" do
@@ -546,7 +561,7 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
                   @params[:order_detail] = {
                     actual_cost: order_detail.actual_cost,
                     actual_subsidy: order_detail.actual_subsidy,
-                    price_change_reason: "because",
+                    price_change_reason: "this is a reason",
                   }
                   do_request
 
@@ -559,7 +574,7 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
                   @params[:order_detail] = {
                     actual_cost: "10",
                     actual_subsidy: order_detail.actual_subsidy,
-                    price_change_reason: "because",
+                    price_change_reason: "this is a reason",
                   }
                   do_request
 
@@ -572,7 +587,7 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
                   @params[:order_detail] = {
                     actual_cost: order_detail.actual_cost,
                     actual_subsidy: "0.5",
-                    price_change_reason: "because",
+                    price_change_reason: "this is a reason",
                   }
                   do_request
 
@@ -583,7 +598,7 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
 
             context "when price has been changed once (at manually set price)" do
               before do
-                order_detail.update_attributes(actual_cost: "10", price_change_reason: "because", price_changed_by_user: create(:user))
+                order_detail.update_attributes(actual_cost: "10", price_change_reason: "i am a reason", price_changed_by_user: create(:user))
               end
 
               context "when changing the note" do
@@ -603,9 +618,8 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
                   @params[:order_detail] = {
                     actual_cost: order_detail.actual_cost,
                     actual_subsidy: order_detail.actual_subsidy,
-                    price_change_reason: "i am a reason",
+                    price_change_reason: "i am a new reason",
                   }
-
                   expect { do_request }.to change { order_detail.reload.price_changed_by_user }.to @admin
                 end
               end
@@ -650,6 +664,7 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
             @params[:order_detail] = {
               actual_cost: "20.00",
               actual_subsidy: "4.00",
+              price_change_reason: "i am a reason",
             }
             do_request
             expect(order_detail.reload.actual_total).to eq(16.00)
@@ -660,6 +675,7 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
               actual_cost: "20.00",
               actual_subsidy: "4.00",
               account_id: new_account.id,
+              price_change_reason: "changing the account",
             }
             do_request
             expect(order_detail.reload.actual_total).to eq(16.00)
@@ -713,6 +729,7 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
               actual_cost: "20.00",
               actual_subsidy: "4.00",
               quantity: 36,
+              price_change_reason: "i am a reason",
             }
             do_request
             expect(order_detail.reload.actual_total).to eq(16.00)
@@ -794,7 +811,7 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
                   .by(containing_exactly(
                         [dispute_by.email],
                         [order_detail.account.owner_user.email],
-                  ))
+                      ))
               end
 
               context "the dispute by is the same as the account owner" do
@@ -1069,7 +1086,7 @@ RSpec.describe OrderManagement::OrderDetailsController, feature_setting: { price
     end
   end
 
-  context '#remove_from_journal' do
+  context "#remove_from_journal" do
     let(:journal) do
       create(:journal, facility: facility, updated_by: 1, reference: "xyz")
     end

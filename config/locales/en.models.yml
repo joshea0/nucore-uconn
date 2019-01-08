@@ -110,9 +110,11 @@ en:
             name:
               taken: "Filename already exists for this order"
         account_user:
+          account_missing_owner: Must have an account owner
           attributes:
             user_id:
               taken: "is already a member of this payment source"
+
         journal:
           attributes:
             journal_date:
@@ -227,7 +229,9 @@ en:
         last_sign_in_at: Last Login
         full_name: Full Name
         suspended: SUSPENDED
+        expired: EXPIRED
       facility:
+        banner_notice: Banner Notice
         fax_number: Fax Number
         is_active: Is Active?
         journal_mask: CoreID
@@ -248,10 +252,11 @@ en:
         is_archived: Is Inactive?
         is_hidden: Is Hidden?
         facility_account: Recharge Chart String
-        training_request_contacts: Training Request Contacts
         user_notes_field_mode: Users may submit a note when purchasing?
         user_notes_label: Label for Notes Field
+        training_request_contacts: Training Request Recipients
         order_notification_recipient: Order Notification Recipient
+        cancellation_email_recipients: Cancellation Notification Recipients
       product_accessory:
         scaling_type: Scaling Type
       instrument:
@@ -262,12 +267,12 @@ en:
       price_group:
         is_internal: Is Internal?
       price_policy:
-        cancellation_cost: Reservation cost
         type: Type
         can_purchase: Can Purchase?
         minimum_cost: Minimum Cost
         hourly_usage_rate: Rate Per Hour
         cancellation_cost: Reservation Cost
+        full_price_cancellation: Full reservation cost
         unit_cost: Unit Cost
         unit_adjustment: Unit Adjustment
         unit_net_cost: Unit Net Cost

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module NavTab
 
   extend ActiveSupport::Concern
@@ -10,6 +12,8 @@ module NavTab
     helper_method(:admin_tab?)
     helper_method(:global_navigation_links)
     helper_method(:navigation_links)
+    helper_method(:home_button)
+    helper_method(:manage_mode?)
   end
 
   module ClassMethods
@@ -31,16 +35,21 @@ module NavTab
     ((self.class.admin_actions || []) & [action_name.to_sym, :all]).any?
   end
 
+  def manage_mode?
+    admin_tab?
+  end
+
   def navigation_links
     case
-    when customer_tab? && acting_user.present?
+    when customer_tab? && !acting_as?
       link_collection.customer.compact
-    when admin_tab? && current_facility.present? && current_facility != Facility.cross_facility
+    when manage_mode?
       link_collection.admin
-    else
-      link_collection.default
+    else []
     end
   end
+
+  delegate :home_button, to: :link_collection
 
   def global_navigation_links
     acting_as? ? [] : global_link_collection.links

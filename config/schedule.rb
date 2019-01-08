@@ -1,4 +1,6 @@
-ENV['RAILS_ENV'] = @environment
+# frozen_string_literal: true
+
+ENV["RAILS_ENV"] = @environment
 require File.expand_path(File.dirname(__FILE__) + "/environment")
 
 # IMPORTANT!!! You should never edit this file in your custom fork.

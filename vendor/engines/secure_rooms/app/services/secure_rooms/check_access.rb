@@ -1,8 +1,11 @@
+# frozen_string_literal: true
+
 module SecureRooms
 
   class CheckAccess
 
     DEFAULT_RULES = [
+      AccessRules::RequiresUserRule,
       AccessRules::OperatorRule,
       AccessRules::ArchivedProductRule,
       AccessRules::RequiresApprovalRule,

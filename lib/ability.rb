@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
 class Ability
 
@@ -22,10 +24,10 @@ class Ability
       else
         can :manage, :all
         unless user.billing_administrator?
-          cannot [:manage_accounts, :manage_billing, :manage_users], Facility.cross_facility
+          cannot [:manage_accounts, :manage_billing], Facility.cross_facility
         end
         unless user.account_manager?
-          cannot :manage, User unless resource.is_a?(Facility) && resource.single_facility?
+          cannot :manage, User unless resource.is_a?(Facility)
           if SettingsHelper.feature_off?(:create_users)
             cannot([:edit, :update], User)
           end
@@ -139,12 +141,13 @@ class Ability
         end
 
         can [:administer], User
+        can(:switch_to, User, &:active?)
 
-        if controller.is_a?(UsersController) || controller.is_a?(SearchController)
-          can :manage, User
-          cannot([:edit, :update], User)
-          cannot(:switch_to, User) { |target_user| !target_user.active? }
+        if controller.is_a?(UsersController)
+          can [:read, :create, :search, :access_list, :access_list_approvals, :new_external, :orders, :accounts], User
         end
+
+        can :user_search_results, User if controller.is_a?(SearchController)
 
         can [:list, :dashboard, :show], Facility
         can :act_as, Facility

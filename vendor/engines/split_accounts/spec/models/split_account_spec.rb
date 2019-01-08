@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 require_relative "../split_accounts_spec_helper"
 
@@ -110,7 +112,7 @@ RSpec.describe SplitAccounts::SplitAccount, :enable_split_accounts, type: :model
       end
     end
 
-    let(:sum) { BigDecimal.new("75.1") }
+    let(:sum) { BigDecimal("75.1") }
 
     it "is a BigDecimal" do
       expect(split_account.percent_total).to be_a(BigDecimal)

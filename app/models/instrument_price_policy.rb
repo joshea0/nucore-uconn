@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class InstrumentPricePolicy < PricePolicy
 
   include InstrumentPricePolicyCalculations
@@ -17,6 +19,10 @@ class InstrumentPricePolicy < PricePolicy
   def reservation_window
     pgp = PriceGroupProduct.find_by(price_group_id: price_group.id, product_id: product.id)
     pgp.try(:reservation_window) || 0
+  end
+
+  def charge_full_price_on_cancellation?
+    SettingsHelper.feature_on?(:charge_full_price_on_cancellation) && full_price_cancellation?
   end
 
   private

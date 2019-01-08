@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails_helper"
 
 RSpec.describe LdapAuthentication::UserEntry do
@@ -19,6 +21,22 @@ RSpec.describe LdapAuthentication::UserEntry do
       entry = described_class.find("uname")
       expect(entry).to be_an_instance_of(described_class)
       expect(admin_ldap).to have_received(:search).with(filter: Net::LDAP::Filter.eq("uid", "uname"))
+    end
+
+    describe "retrying" do
+      it "raise an error if it fails 3 times" do
+        expect(admin_ldap).to(receive(:search).exactly(3).times { raise(Net::LDAP::Error, "Connection timed out") })
+
+        expect { described_class.find("uname") }.to raise_error(Net::LDAP::Error, "Connection timed out")
+      end
+
+      it "succeeds if it succeeds the third time" do
+        expect(admin_ldap).to(receive(:search).twice { raise(Net::LDAP::Error, "Connection timed out") })
+        expect(admin_ldap).to(receive(:search).once { [net_ldap_entry] })
+
+        entry = described_class.find("uname")
+        expect(entry).to be_an_instance_of(described_class)
+      end
     end
   end
 
