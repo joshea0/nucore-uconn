@@ -22,6 +22,10 @@ class OrderDetail < ApplicationRecord
 
   attr_accessor :order_status_updated_by
 
+  # These need to be writable for split accounts to work. If they haven't been
+  # explicitly written to, they'll be calculated.
+  attr_writer :calculated_cost, :calculated_subsidy
+
   # Used to mark a dispute as resolved
   attr_accessor :resolve_dispute
   before_validation :mark_dispute_resolved, if: :resolve_dispute
@@ -659,6 +663,18 @@ class OrderDetail < ApplicationRecord
     pp
   end
 
+  def calculated_cost
+    @calculated_cost ||= calculated_costs[:cost]
+  end
+
+  def calculated_subsidy
+    @calculated_subsidy ||= calculated_costs[:subsidy]
+  end
+
+  def calculated_total
+    calculated_cost - calculated_subsidy if calculated_cost && calculated_subsidy
+  end
+
   def available_accounts
     Account.for_order_detail(self)
   end
@@ -786,7 +802,7 @@ class OrderDetail < ApplicationRecord
   #
   # Returns true if this order detail is part of a bundle purchase, false otherwise
   def bundled?
-    !bundle.nil?
+    bundle.present?
   end
 
   # Useful when sorting so we don't get `nil` to number comparisons
@@ -868,6 +884,10 @@ class OrderDetail < ApplicationRecord
     elsif reservation.try(:canceled?)
       Time.current
     end
+  end
+
+  def calculated_costs
+    price_policy&.calculate_cost_and_subsidy_from_order_detail(self) || {}
   end
 
   def make_complete

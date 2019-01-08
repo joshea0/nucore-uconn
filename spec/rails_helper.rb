@@ -32,15 +32,16 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
 
   config.around(:each, :feature_setting) do |example|
-    example.metadata[:feature_setting].each do |feature, value|
-      SettingsHelper.enable_feature(feature, value)
+    example.metadata[:feature_setting].except(:reload_routes).each do |feature, value|
+      Settings.feature[feature] = value
     end
-    Nucore::Application.reload_routes!
+
+    Nucore::Application.reload_routes! if example.metadata[:feature_setting][:reload_routes]
 
     example.call
 
     Settings.reload!
-    Nucore::Application.reload_routes!
+    Nucore::Application.reload_routes! if example.metadata[:feature_setting][:reload_routes]
   end
 
   config.around(:each, :billing_review_period) do |example|
@@ -91,6 +92,13 @@ RSpec.configure do |config|
   end
 
   config.after(:all) { travel_back }
+
+  config.around(:each, :active_job) do |example|
+    old_value = ActiveJob::Base.queue_adapter
+    ActiveJob::Base.queue_adapter = :test
+    example.call
+    ActiveJob::Base.queue_adapter = old_value
+  end
 
   # rspec-rails 3 will no longer automatically infer an example group's spec type
   # from the file location. You can explicitly opt-in to the feature using this
