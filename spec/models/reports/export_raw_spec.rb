@@ -54,11 +54,18 @@ RSpec.describe Reports::ExportRaw do
         "Estimated Cost" => "$39.99",
         "Estimated Subsidy" => "$29.99",
         "Estimated Total" => "$10.00",
+        "Calculated Cost" => "$3.00", # Default price policy is $1/each
+        "Calculated Subsidy" => "$0.00",
+        "Calculated Total" => "$3.00",
         "Actual Cost" => "$19.99",
         "Actual Subsidy" => "$9.99",
         "Actual Total" => "$10.00",
+        "Difference Cost" => "$16.99",
+        "Difference Subsidy" => "$9.99",
+        "Difference Total" => "$7.00",
         "Charge For" => "Quantity",
         "Assigned Staff" => user.full_name,
+        "Bundle" => "",
       )
     end
 
@@ -143,6 +150,21 @@ RSpec.describe Reports::ExportRaw do
       it "exports correct number of line items" do
         expect(report.to_csv.split("\n").length).to eq(2)
       end
+    end
+  end
+
+  describe "with a bundle" do
+    let(:items) { FactoryBot.create_list(:setup_item, 2, facility: facility) }
+    let(:bundle) { FactoryBot.create(:bundle, facility: facility, bundle_products: items) }
+
+    let!(:order) { FactoryBot.create(:purchased_order, product: bundle) }
+    let(:order_detail) { order.order_details.first }
+
+    it "has the bundle name" do
+      expect(report).to have_column_values(
+        "Product" => items.map(&:name),
+        "Bundle" => [bundle.name, bundle.name],
+      )
     end
   end
 end
