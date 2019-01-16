@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 ruby File.open(File.expand_path(".ruby-version", File.dirname(__FILE__))) { |f| f.read.chomp }
 
-git_source(:github) { |repo_name| "git@github.com:#{repo_name}.git" }
+git_source(:github) { |repo_name| "https://github.com/#{repo_name}.git" }
 
 ## base
 gem "rails", "5.0.7"
@@ -93,7 +93,7 @@ end
 group :development, :deployment do
   gem "capistrano",         require: false
   gem "capistrano-rails",   require: false
-  gem "capistrano-rvm",     require: false
+  gem "capistrano-chruby"   ,  require: false
   gem "capistrano-bundler", require: false
 
   # These gems are required to support ed25519 SSH keys for deploying via capistrano
